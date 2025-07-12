@@ -1,0 +1,17 @@
+:ha Hello, I'm you host mylo, welcome to my session. Please park up and make sure your vehicle is not banned.
+:ha AORP will be in the new town, people that need help getting there, please let me know.
+:ha Civilians are not permitted to "void" a scene, if you would like to void a scene contact a staff member for permission to do so.
+:ha Unrealistic avatars ruin the feeling of realistic roleplays. Please keep your avatar as realistic as possible during a active roleplay.
+:ha All forms of punishment evasion, including combat logging, changing teams to not be caught, etc. are bannable offenses.
+:ha Any form of bypassing any light(s) to continue on with your roleplay is unacceptable.
+:ha When strict or normal peacetime is enabled, no one is allowed to run from law enforcement.
+:ha If you require staff, say: !staff (severity 1-10) (reason)
+
+:ha I will now be doing vehicle checks.
+:a P/S, EA and staff may leave.
+
+
+:ha PT status: ON - FRP speed: 75 - Drift status: off
+:ha PT status: Strict - FRP speed: 65 - Drift status: off
+:a This means no running stop signs or red lights.
+
