@@ -1,0 +1,1 @@
+This is a system for an IT company which is meant to help babe keep track of everything that happens from your employees, customers, products, invoices, quotations, tenders and even company documents.
