@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import './SalesReports.css'; // Use your existing CSS
+import Sidebar from '../components/Sidebar';
 
 const simulateAPICall = (url, filters) => {
   return new Promise((resolve) => {
@@ -192,81 +193,84 @@ const SalesReports = () => {
   };
 
   return (
-    <div className="reports-container">
-      <h1>Sales Reports</h1>
-      <div className="report-filters">
-        <div className="filter-row">
-          <div className="filter-group">
-            <label>Date Range</label>
-            <select value={dateRange} onChange={e => handleDateRangeChange(e.target.value)}>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="quarter">This Quarter</option>
-              <option value="year">This Year</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
-
-          {showCustomDates && (
-            <div className="filter-group custom-dates">
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-              <span>to</span>
-              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+    <div className="main-view">
+      <Sidebar />
+      <div className="reports-container">
+        <h1>Sales Reports</h1>
+        <div className="report-filters">
+          <div className="filter-row">
+            <div className="filter-group">
+              <label>Date Range</label>
+              <select value={dateRange} onChange={e => handleDateRangeChange(e.target.value)}>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+                <option value="custom">Custom</option>
+              </select>
             </div>
-          )}
 
-          <div className="filter-group">
-            <label>Group By</label>
-            <select value={groupBy} onChange={e => setGroupBy(e.target.value)}>
-              <option value="day">Day</option>
-              <option value="week">Week</option>
-              <option value="month">Month</option>
-              <option value="quarter">Quarter</option>
-              <option value="year">Year</option>
-            </select>
+            {showCustomDates && (
+              <div className="filter-group custom-dates">
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                <span>to</span>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+              </div>
+            )}
+
+            <div className="filter-group">
+              <label>Group By</label>
+              <select value={groupBy} onChange={e => setGroupBy(e.target.value)}>
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+                <option value="quarter">Quarter</option>
+                <option value="year">Year</option>
+              </select>
+            </div>
+
+            <button className="btn-primary" onClick={() => loadSalesData()}>Apply</button>
+            <button className="btn-secondary" onClick={handleExport}>Export</button>
           </div>
-
-          <button className="btn-primary" onClick={() => loadSalesData()}>Apply</button>
-          <button className="btn-secondary" onClick={handleExport}>Export</button>
         </div>
-      </div>
 
-      <div className="report-charts">
-        <div className="chart-container">
-          <canvas ref={salesChartRef}></canvas>
+        <div className="report-charts">
+          <div className="chart-container">
+            <canvas ref={salesChartRef}></canvas>
+          </div>
+          <div className="chart-container">
+            <canvas ref={productChartRef}></canvas>
+          </div>
         </div>
-        <div className="chart-container">
-          <canvas ref={productChartRef}></canvas>
-        </div>
-      </div>
 
-      <div className="report-data">
-        <h2>Detailed Data</h2>
-        <table id="salesDataTable">
-          <thead>
-            <tr>
-              <th>Period</th>
-              <th>Invoices</th>
-              <th>Revenue</th>
-              <th>Tax</th>
-              <th>Profit</th>
-              <th>Avg. Invoice</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableData.map((period, index) => (
-              <tr key={index}>
-                <td>{period.label}</td>
-                <td>{period.invoices}</td>
-                <td>${period.revenue.toFixed(2)}</td>
-                <td>${period.tax.toFixed(2)}</td>
-                <td>${period.profit.toFixed(2)}</td>
-                <td>${period.avgInvoice.toFixed(2)}</td>
+        <div className="report-data">
+          <h2>Detailed Data</h2>
+          <table id="salesDataTable">
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Invoices</th>
+                <th>Revenue</th>
+                <th>Tax</th>
+                <th>Profit</th>
+                <th>Avg. Invoice</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {tableData.map((period, index) => (
+                <tr key={index}>
+                  <td>{period.label}</td>
+                  <td>{period.invoices}</td>
+                  <td>${period.revenue.toFixed(2)}</td>
+                  <td>${period.tax.toFixed(2)}</td>
+                  <td>${period.profit.toFixed(2)}</td>
+                  <td>${period.avgInvoice.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

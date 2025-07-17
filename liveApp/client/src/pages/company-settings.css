@@ -9,6 +9,11 @@
   --border: #e0e0e0;
   --success: #4caf50;
 }
+.main-view {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
 
 * {
   margin: 0;

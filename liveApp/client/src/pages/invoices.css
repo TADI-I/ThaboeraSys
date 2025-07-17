@@ -13,6 +13,12 @@
   --danger: #f44336;
 }
 
+.main-view {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -26,7 +32,8 @@ body {
 }
 
 .documents-container {
-  max-width: 1200px;
+  min-width: 70%;
+  max-width: 90%;
   margin: 0 auto;
   padding: 30px;
 }

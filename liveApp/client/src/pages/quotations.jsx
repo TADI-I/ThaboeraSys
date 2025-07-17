@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import './quotations.css'; // Move the style into this CSS file
+import './quotations.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileInvoiceDollar, faPlus, faFilter, faEye, faExchangeAlt, faPaperPlane, faHome } from '@fortawesome/free-solid-svg-icons';
+import Sidebar from '../components/Sidebar';
 
 const Quotations = () => {
   const [quotations, setQuotations] = useState([]);
@@ -60,81 +61,83 @@ const Quotations = () => {
   };
 
   return (
-    <div className="documents-container">
-      <h1><FontAwesomeIcon icon={faFileInvoiceDollar} /> Quotations</h1>
-      <button className="btn-secondary" onClick={() => window.location.href = '/dashboard'}>
-        <FontAwesomeIcon icon={faHome} /> Dashboard
-      </button>
-      <div className="document-actions">
-        <button className="btn-primary" onClick={() => window.location.href = '/quotations/create'}>
-          <FontAwesomeIcon icon={faPlus} /> Create Quotation
-        </button>
-
-        <div className="document-filters">
-          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="">All Statuses</option>
-            <option value="PENDING">Pending</option>
-            <option value="ACCEPTED">Accepted</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="EXPIRED">Expired</option>
-          </select>
-
-          <input type="text" placeholder="Filter by client..." value={clientFilter} onChange={e => setClientFilter(e.target.value)} />
-
-          <button className="btn-secondary" onClick={loadQuotations}>
-            <FontAwesomeIcon icon={faFilter} /> Apply
+    <>
+      <div className="main-view">
+        <Sidebar />
+        <div className="documents-container">
+          <h1><FontAwesomeIcon icon={faFileInvoiceDollar} /> Quotations</h1>
+          <button className="btn-secondary" onClick={() => window.location.href = '/dashboard'}>
+            <FontAwesomeIcon icon={faHome} /> Dashboard
           </button>
+          <div className="document-actions">
+            <button className="btn-primary" onClick={() => window.location.href = '/quotations/create'}>
+              <FontAwesomeIcon icon={faPlus} /> Create Quotation
+            </button>
+            <div className="document-filters">
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                <option value="">All Statuses</option>
+                <option value="PENDING">Pending</option>
+                <option value="ACCEPTED">Accepted</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="EXPIRED">Expired</option>
+              </select>
+              <input type="text" placeholder="Filter by client..." value={clientFilter} onChange={e => setClientFilter(e.target.value)} />
+              <button className="btn-secondary" onClick={loadQuotations}>
+                <FontAwesomeIcon icon={faFilter} /> Apply
+              </button>
+            </div>
+          </div>
+
+          <table id="quotationsTable">
+            <thead>
+              <tr>
+                <th>Quote #</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Expiry Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quotations.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="empty-state">
+                    <FontAwesomeIcon icon={faFileInvoiceDollar} />
+                    <p>No quotations found</p>
+                  </td>
+                </tr>
+              ) : (
+                quotations.map(quote => (
+                  <tr key={quote.id}>
+                    <td>{quote.quoteNumber}</td>
+                    <td>{quote.client.name}</td>
+                    <td>{formatDate(quote.date)}</td>
+                    <td>${quote.total.toFixed(2)}</td>
+                    <td><span className={`status-${quote.status.toLowerCase()}`}>{quote.status}</span></td>
+                    <td>{formatDate(quote.expiryDate)}</td>
+                    <td className="actions">
+                      <button className="btn-view" onClick={() => viewQuotation(quote.id)}>
+                        <FontAwesomeIcon icon={faEye} /> View
+                      </button>
+                      <button className="btn-convert" onClick={() => convertToInvoice(quote.id)}>
+                        <FontAwesomeIcon icon={faExchangeAlt} /> Convert
+                      </button>
+                      {quote.status === 'PENDING' && (
+                        <button className="btn-send" onClick={() => sendQuotation(quote.id)}>
+                          <FontAwesomeIcon icon={faPaperPlane} /> Send
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-
-      <table id="quotationsTable">
-        <thead>
-          <tr>
-            <th>Quote #</th>
-            <th>Client</th>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Expiry Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {quotations.length === 0 ? (
-            <tr>
-              <td colSpan="7" className="empty-state">
-                <FontAwesomeIcon icon={faFileInvoiceDollar} />
-                <p>No quotations found</p>
-              </td>
-            </tr>
-          ) : (
-            quotations.map(quote => (
-              <tr key={quote.id}>
-                <td>{quote.quoteNumber}</td>
-                <td>{quote.client.name}</td>
-                <td>{formatDate(quote.date)}</td>
-                <td>${quote.total.toFixed(2)}</td>
-                <td><span className={`status-${quote.status.toLowerCase()}`}>{quote.status}</span></td>
-                <td>{formatDate(quote.expiryDate)}</td>
-                <td className="actions">
-                  <button className="btn-view" onClick={() => viewQuotation(quote.id)}>
-                    <FontAwesomeIcon icon={faEye} /> View
-                  </button>
-                  <button className="btn-convert" onClick={() => convertToInvoice(quote.id)}>
-                    <FontAwesomeIcon icon={faExchangeAlt} /> Convert
-                  </button>
-                  {quote.status === 'PENDING' && (
-                    <button className="btn-send" onClick={() => sendQuotation(quote.id)}>
-                      <FontAwesomeIcon icon={faPaperPlane} /> Send
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+    </>
   );
 };
 

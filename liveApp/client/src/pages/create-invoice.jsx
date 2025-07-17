@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './create-invoice.css'; // Assuming you have a CSS file for styling
+import Sidebar from '../components/Sidebar';
 
 const InvoicePreview = ({ invoice }) => {
   return (
@@ -219,159 +220,164 @@ const handleSave = async (preview = false, send = false, download = false) => {
 
 
   return (
-    <div className="document-creation-container">
-      <div className="header-actions">
-        <h1>{isEditMode ? 'Edit Invoice' : 'Create New Invoice'}</h1>
-        <button className="btn-secondary" onClick={() => navigate('/invoices')}>Back to Invoices</button>
+    <>
+      <div className="main-view">
+        <Sidebar />
+        <div className="document-creation-container">
+          <div className="header-actions">
+            <h1>{isEditMode ? 'Edit Invoice' : 'Create New Invoice'}</h1>
+            <button className="btn-secondary" onClick={() => navigate('/invoices')}>Back to Invoices</button>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Client Name</label>
+                <input 
+                  type="text" 
+                  name="clientName" 
+                  value={invoice.clientName} 
+                  onChange={handleChange} 
+                  required 
+                  placeholder="Enter client name"
+                />
+              </div>
+              <div className="form-group">
+                <label>Invoice #</label>
+                <input type="text" value={invoice.number} readOnly />
+              </div>
+              <div className="form-group">
+                <label>Invoice Date</label>
+                <input type="date" name="date" value={invoice.date} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Due Date</label>
+                <input type="date" name="dueDate" value={invoice.dueDate} onChange={handleChange} required />
+              </div>
+            </div>
+
+            <div className="invoice-items">
+              <h3>Items</h3>
+              <div className="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                      <th>Tax</th>
+                      <th>Total</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoice.items.map((item, i) => (
+                      <tr key={i}>
+                        <td>
+                          <input 
+                            value={item.description} 
+                            onChange={e => handleItemChange(i, 'description', e.target.value)} 
+                            placeholder="Item description"
+                            required
+                          />
+                        </td>
+                        <td>
+                          <input 
+                            type="number" 
+                            min="1" 
+                            value={item.quantity} 
+                            onChange={e => handleItemChange(i, 'quantity', e.target.value)} 
+                          />
+                        </td>
+                        <td>
+                          <input 
+                            type="number" 
+                            step="0.01" 
+                            value={item.price} 
+                            onChange={e => handleItemChange(i, 'price', e.target.value)} 
+                          />
+                        </td>
+                        <td>
+                          <select 
+                            value={item.taxRate} 
+                            onChange={e => handleItemChange(i, 'taxRate', e.target.value)}
+                          >
+                            <option value="0">0%</option>
+                            <option value="15">15%</option>
+                          </select>
+                        </td>
+                        <td>{(item.quantity * item.price).toFixed(2)}</td>
+                        <td>
+                          <button 
+                            type="button" 
+                            className="btn-remove-item" 
+                            onClick={() => handleRemoveItem(i)}
+                          >
+                            ×
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <button type="button" className="btn-secondary" onClick={handleAddItem}>Add Item</button>
+            </div>
+
+            <div className="invoice-totals">
+              <div className="totals-row">
+                <span>Subtotal:</span>
+                <span>{totals.subtotal.toFixed(2)}</span>
+              </div>
+              <div className="totals-row">
+                <label htmlFor="discount">Discount</label>
+                <input 
+                  type="number" 
+                  name="discount" 
+                  value={invoice.discount} 
+                  onChange={handleChange} 
+                />
+                <span>{invoice.discount.toFixed(2)}</span>
+              </div>
+              <div className="totals-row">
+                <span>Tax:</span>
+                <span>{totals.tax.toFixed(2)}</span>
+              </div>
+              <div className="totals-row grand-total">
+                <span>Total:</span>
+                <span>{totals.grand.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Notes</label>
+              <textarea 
+                name="notes" 
+                value={invoice.notes} 
+                onChange={handleChange}
+                placeholder="Additional notes for the invoice"
+              ></textarea>
+            </div>
+
+            <div className="form-group">
+              <label>Terms & Conditions</label>
+              <textarea 
+                name="terms" 
+                value={invoice.terms} 
+                onChange={handleChange}
+                placeholder="Payment terms and conditions"
+              ></textarea>
+            </div>
+
+            <div className="form-actions">
+              <button onClick={() => handleSave()} className="btn-primary">Save Invoice</button>
+              <button type="button" className="btn-secondary" onClick={() => handleSave(true)}>Preview</button>
+              <button type="button" className="btn-secondary" onClick={() => handleSave(false, true)}>Send to Client</button>
+              <button type="button" className="btn-secondary" onClick={() => handleSave(false, false, true)}>Download PDF</button>
+            </div>
+          </form>
+        </div>
       </div>
-      <form onSubmit={handleSubmit}>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Client Name</label>
-            <input 
-              type="text" 
-              name="clientName" 
-              value={invoice.clientName} 
-              onChange={handleChange} 
-              required 
-              placeholder="Enter client name"
-            />
-          </div>
-          <div className="form-group">
-            <label>Invoice #</label>
-            <input type="text" value={invoice.number} readOnly />
-          </div>
-          <div className="form-group">
-            <label>Invoice Date</label>
-            <input type="date" name="date" value={invoice.date} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
-            <label>Due Date</label>
-            <input type="date" name="dueDate" value={invoice.dueDate} onChange={handleChange} required />
-          </div>
-        </div>
-
-        <div className="invoice-items">
-          <h3>Items</h3>
-          <div className="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>Description</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Tax</th>
-                  <th>Total</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoice.items.map((item, i) => (
-                  <tr key={i}>
-                    <td>
-                      <input 
-                        value={item.description} 
-                        onChange={e => handleItemChange(i, 'description', e.target.value)} 
-                        placeholder="Item description"
-                        required
-                      />
-                    </td>
-                    <td>
-                      <input 
-                        type="number" 
-                        min="1" 
-                        value={item.quantity} 
-                        onChange={e => handleItemChange(i, 'quantity', e.target.value)} 
-                      />
-                    </td>
-                    <td>
-                      <input 
-                        type="number" 
-                        step="0.01" 
-                        value={item.price} 
-                        onChange={e => handleItemChange(i, 'price', e.target.value)} 
-                      />
-                    </td>
-                    <td>
-                      <select 
-                        value={item.taxRate} 
-                        onChange={e => handleItemChange(i, 'taxRate', e.target.value)}
-                      >
-                        <option value="0">0%</option>
-                        <option value="15">15%</option>
-                      </select>
-                    </td>
-                    <td>{(item.quantity * item.price).toFixed(2)}</td>
-                    <td>
-                      <button 
-                        type="button" 
-                        className="btn-remove-item" 
-                        onClick={() => handleRemoveItem(i)}
-                      >
-                        ×
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <button type="button" className="btn-secondary" onClick={handleAddItem}>Add Item</button>
-        </div>
-
-        <div className="invoice-totals">
-          <div className="totals-row">
-            <span>Subtotal:</span>
-            <span>{totals.subtotal.toFixed(2)}</span>
-          </div>
-          <div className="totals-row">
-            <label htmlFor="discount">Discount</label>
-            <input 
-              type="number" 
-              name="discount" 
-              value={invoice.discount} 
-              onChange={handleChange} 
-            />
-            <span>{invoice.discount.toFixed(2)}</span>
-          </div>
-          <div className="totals-row">
-            <span>Tax:</span>
-            <span>{totals.tax.toFixed(2)}</span>
-          </div>
-          <div className="totals-row grand-total">
-            <span>Total:</span>
-            <span>{totals.grand.toFixed(2)}</span>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Notes</label>
-          <textarea 
-            name="notes" 
-            value={invoice.notes} 
-            onChange={handleChange}
-            placeholder="Additional notes for the invoice"
-          ></textarea>
-        </div>
-
-        <div className="form-group">
-          <label>Terms & Conditions</label>
-          <textarea 
-            name="terms" 
-            value={invoice.terms} 
-            onChange={handleChange}
-            placeholder="Payment terms and conditions"
-          ></textarea>
-        </div>
-
-        <div className="form-actions">
-          <button onClick={() => handleSave()} className="btn-primary">Save Invoice</button>
-          <button type="button" className="btn-secondary" onClick={() => handleSave(true)}>Preview</button>
-          <button type="button" className="btn-secondary" onClick={() => handleSave(false, true)}>Send to Client</button>
-          <button type="button" className="btn-secondary" onClick={() => handleSave(false, false, true)}>Download PDF</button>
-        </div>
-      </form>
-    </div>
+    </>
   );
 };
 

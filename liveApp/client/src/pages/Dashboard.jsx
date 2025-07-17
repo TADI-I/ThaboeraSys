@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Chart } from 'chart.js/auto';
-import './Dashboard.css'; // We'll extract the CSS into a separate file
+import './Dashboard.css';
+import Sidebar from '../components/Sidebar'; // <-- Sidebar import
 
 const Dashboard = () => {
   const [sidebarActive, setSidebarActive] = useState(false);
@@ -16,25 +17,16 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // Initialize charts after component mounts
     initializeCharts();
-    
-    // Check authentication
     if (!localStorage.getItem('authToken')) {
       window.location.href = '/login';
     }
-    
-    // Load user data
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     if (storedUser.name) setUser(storedUser);
-    
-    // Load stats (simulated API call)
     loadStats();
   }, []);
 
-  const toggleSidebar = () => {
-    setSidebarActive(!sidebarActive);
-  };
+  const toggleSidebar = () => setSidebarActive(!sidebarActive);
 
   const handleLogout = (e) => {
     e.preventDefault();
@@ -46,7 +38,6 @@ const Dashboard = () => {
   };
 
   const initializeCharts = () => {
-    // Sales Chart
     const salesCtx = document.getElementById('salesChart');
     if (salesCtx) {
       new Chart(salesCtx, {
@@ -86,7 +77,6 @@ const Dashboard = () => {
       });
     }
 
-    // Inventory Chart
     const inventoryCtx = document.getElementById('inventoryChart');
     if (inventoryCtx) {
       new Chart(inventoryCtx, {
@@ -125,8 +115,8 @@ const Dashboard = () => {
   };
 
   const loadStats = async () => {
-    // Simulate API call
     try {
+      // Simulate API call
       // const response = await fetch('/api/stats');
       // const data = await response.json();
       // setStats(data);
@@ -136,150 +126,42 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-layout">
-      {/* Mobile Menu Toggle */}
-      <button className="mobile-menu-toggle" onClick={toggleSidebar}>
-        <i className="fas fa-bars"></i>
-      </button>
-      
-      {/* Sidebar Navigation */}
-      <nav className={`sidebar ${sidebarActive ? 'active' : ''}`}>
-        <div className="sidebar-header">
-          <button className="sidebar-close" onClick={toggleSidebar}>
-            <i className="fas fa-times"></i>
-          </button>
-          <div className="company-logo">IT</div>
-          <h2>ThaboEra IT Solutions</h2>
-        </div>
-        
-        <div className="sidebar-menu">
-          {/* Dashboard */}
-          <div className="menu-section">
-            <a href="/dashboard" className="menu-item active">
-              <i className="fas fa-tachometer-alt"></i>
-              <span>Dashboard</span>
-            </a>
-          </div>
-          
-          {/* Authentication */}
-          <div className="menu-section">
-            <div className="menu-section-title">Account</div>
-            <a href="/profile" className="menu-item">
-              <i className="fas fa-user-circle"></i>
-              <span>My Profile</span>
-            </a>
-            <a href="./" className="menu-item" onClick={handleLogout}>
-              <i className="fas fa-sign-out-alt"></i>
-              <span>Logout</span>
-              </a>
-              <a href="./notifications" className="menu-item" >
-              <i className="fas fa-sign-out-alt"></i>
-              <span>Notifications</span>
-            </a>
-          </div>
-          
-          {/* User Management */}
-          <div className="menu-section">
-            <div className="menu-section-title">Management</div>
-            <a href="/user-management" className="menu-item">
-              <i className="fas fa-users-cog"></i>
-              <span>User Management</span>
-            </a>
-            <a href="/company-settings" className="menu-item">
-              <i className="fas fa-cog"></i>
-              <span>Company Settings</span>
-            </a>
-          </div>
-          
-          {/* Inventory */}
-          <div className="menu-section">
-            <div className="menu-section-title">Inventory</div>
-            <a href="/products" className="menu-item">
-              <i className="fas fa-boxes"></i>
-              <span>Products</span>
-            </a>
-            <a href="/suppliers" className="menu-item">
-              <i className="fas fa-truck"></i>
-              <span>Suppliers</span>
-            </a>
-            <a href="/documents" className="menu-item">
-              <i className="fas fa-truck"></i>
-              <span>Documents</span>
-            </a>
-          </div>
-          
-          {/* Sales */}
-          <div className="menu-section">
-            <div className="menu-section-title">Sales</div>
-            <a href="/invoices" className="menu-item">
-              <i className="fas fa-file-invoice-dollar"></i>
-              <span>Invoices</span>
-            </a>
-            <a href="/invoices/create" className="menu-item">
-              <i className="fas fa-plus-circle"></i>
-              <span>Create Invoice</span>
-            </a>
-            <a href="/quotations" className="menu-item">
-              <i className="fas fa-file-signature"></i>
-              <span>Quotations</span>
-            </a>
-            <a href="/quotations/create" className="menu-item">
-              <i className="fas fa-plus-circle"></i>
-              <span>Create Quotation</span>
-            </a>
-          </div>
-          
-          {/* Reports */}
-          <div className="menu-section">
-            <div className="menu-section-title">Reports</div>
-            <a href="/sales-reports" className="menu-item">
-              <i className="fas fa-chart-line"></i>
-              <span>Sales Reports</span>
-            </a>
-            <a href="/stock-reports" className="menu-item">
-              <i className="fas fa-chart-pie"></i>
-              <span>Stock Reports</span>
-            </a>
-            <a href="/audit-logs" className="menu-item">
-              <i className="fas fa-chart-pie"></i>
-              <span>System Logs</span>
-            </a>
-          </div>
-        </div>
-      </nav>
-      
-      {/* Overlay for mobile menu */}
-      <div 
-        className={`sidebar-overlay ${sidebarActive ? 'active' : ''}`} 
-        onClick={toggleSidebar}
-      ></div>
+    <div className="main-view">
+      <Sidebar />
+      <div className="dashboard-main">
+        {/* Mobile Menu Toggle */}
+        <button className="mobile-menu-toggle" onClick={toggleSidebar}>
+          <i className="fas fa-bars"></i>
+        </button>
 
-      {/* Main Dashboard */}
-      <main className="dashboard-main">
+        {/* Overlay for mobile menu */}
+        <div
+          className={`sidebar-overlay ${sidebarActive ? 'active' : ''}`}
+          onClick={toggleSidebar}
+        ></div>
+
         {/* Top Bar */}
         <div className="top-bar">
           <div className="search-box">
             <i className="fas fa-search"></i>
             <input type="text" placeholder="Search..." />
           </div>
-          
           <div className="user-menu">
             <div className="notifications">
               <i className="fas fa-bell"></i>
               <span className="badge">3</span>
             </div>
-            
             <div className="user-profile">
               <img src={user.avatar} alt="User" />
               <span>{user.name}</span>
             </div>
           </div>
         </div>
-        
+
         {/* Content Area */}
         <div className="content-area">
           <h1>Dashboard Overview</h1>
-          
+
           {/* Stats Cards */}
           <div className="stats-cards">
             <div className="card">
@@ -290,7 +172,6 @@ const Dashboard = () => {
                 12% from last month
               </div>
             </div>
-            
             <div className="card">
               <h3>Open Tickets</h3>
               <p>{stats.openTickets}</p>
@@ -299,7 +180,6 @@ const Dashboard = () => {
                 3% from last week
               </div>
             </div>
-            
             <div className="card">
               <h3>New Customers</h3>
               <p>{stats.newCustomers}</p>
@@ -308,7 +188,6 @@ const Dashboard = () => {
                 8% from last month
               </div>
             </div>
-            
             <div className="card">
               <h3>Inventory Items</h3>
               <p>{stats.inventoryItems}</p>
@@ -318,20 +197,19 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Charts Section */}
           <div className="charts-section">
             <div className="chart-container">
               <h3>Monthly Sales</h3>
               <canvas id="salesChart"></canvas>
             </div>
-            
             <div className="chart-container">
               <h3>Inventory Levels</h3>
               <canvas id="inventoryChart"></canvas>
             </div>
           </div>
-          
+
           {/* Recent Activity */}
           <div className="recent-activity">
             <h2>Recent Activity</h2>
@@ -345,7 +223,6 @@ const Dashboard = () => {
                   <div className="activity-time">10 minutes ago</div>
                 </div>
               </li>
-              
               <li className="activity-item">
                 <div className="activity-icon">
                   <i className="fas fa-user"></i>
@@ -355,7 +232,6 @@ const Dashboard = () => {
                   <div className="activity-time">1 hour ago</div>
                 </div>
               </li>
-              
               <li className="activity-item">
                 <div className="activity-icon">
                   <i className="fas fa-truck"></i>
@@ -368,7 +244,7 @@ const Dashboard = () => {
             </ul>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

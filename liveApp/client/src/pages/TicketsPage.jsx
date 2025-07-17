@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './TicketsPage.css';
+import Sidebar from '../components/Sidebar';
 
 const TicketsPage = () => {
   const [tickets, setTickets] = useState([]);
@@ -63,101 +64,104 @@ const TicketsPage = () => {
   );
 
   return (
-    <div className="tickets-container">
-      <h1>Support Tickets</h1>
+    <div className="main-view">
+      <Sidebar />
+      <div className="tickets-container">
+        <h1>Support Tickets</h1>
 
-      <div className="ticket-actions">
-        <button className="btn-primary" onClick={() => setShowModal(true)}>Create Ticket</button>
-        <div className="ticket-filters">
-          <select name="status" value={filters.status} onChange={handleFilterChange}>
-            <option value="">All Statuses</option>
-            <option value="open">Open</option>
-            <option value="in-progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
-          </select>
-          <select name="priority" value={filters.priority} onChange={handleFilterChange}>
-            <option value="">All Priorities</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
-          </select>
-          <input
-            type="text"
-            placeholder="Search tickets..."
-            value={filters.search}
-            onChange={handleSearch}
-          />
-        </div>
-      </div>
-
-      <table id="ticketsTable">
-        <thead>
-          <tr>
-            <th>Ticket #</th>
-            <th>Subject</th>
-            <th>Client</th>
-            <th>Status</th>
-            <th>Priority</th>
-            <th>Created</th>
-            <th>Assigned To</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTickets.map(ticket => (
-            <tr key={ticket.id}>
-              <td>{ticket.id}</td>
-              <td>{ticket.subject}</td>
-              <td>{ticket.client}</td>
-              <td>{ticket.status}</td>
-              <td>{ticket.priority}</td>
-              <td>{ticket.created}</td>
-              <td>{ticket.assignedTo}</td>
-              <td><button>Edit</button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {showModal && (
-        <div className="modal" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <span className="close" onClick={() => setShowModal(false)}>&times;</span>
-            <h2>Create New Ticket</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <input type="text" id="ticketSubject" placeholder="Subject" value={formData.subject} onChange={handleInputChange} required />
-              </div>
-              <div className="form-group">
-                <select id="ticketClient" value={formData.client} onChange={handleInputChange} required>
-                  <option value="">Select client</option>
-                  {clients.map(client => (
-                    <option key={client} value={client}>{client}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <select id="ticketPriority" value={formData.priority} onChange={handleInputChange}>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="critical">Critical</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <textarea id="ticketDescription" placeholder="Describe the issue..." value={formData.description} onChange={handleInputChange} required></textarea>
-              </div>
-              <div className="form-group">
-                <label>Attachments</label>
-                <input type="file" id="ticketAttachments" onChange={handleInputChange} multiple />
-              </div>
-              <button type="submit" className="btn-primary">Create Ticket</button>
-            </form>
+        <div className="ticket-actions">
+          <button className="btn-primary" onClick={() => setShowModal(true)}>Create Ticket</button>
+          <div className="ticket-filters">
+            <select name="status" value={filters.status} onChange={handleFilterChange}>
+              <option value="">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="in-progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+            <select name="priority" value={filters.priority} onChange={handleFilterChange}>
+              <option value="">All Priorities</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Search tickets..."
+              value={filters.search}
+              onChange={handleSearch}
+            />
           </div>
         </div>
-      )}
+
+        <table id="ticketsTable">
+          <thead>
+            <tr>
+              <th>Ticket #</th>
+              <th>Subject</th>
+              <th>Client</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Created</th>
+              <th>Assigned To</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTickets.map(ticket => (
+              <tr key={ticket.id}>
+                <td>{ticket.id}</td>
+                <td>{ticket.subject}</td>
+                <td>{ticket.client}</td>
+                <td>{ticket.status}</td>
+                <td>{ticket.priority}</td>
+                <td>{ticket.created}</td>
+                <td>{ticket.assignedTo}</td>
+                <td><button>Edit</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {showModal && (
+          <div className="modal" onClick={() => setShowModal(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <span className="close" onClick={() => setShowModal(false)}>&times;</span>
+              <h2>Create New Ticket</h2>
+              <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <input type="text" id="ticketSubject" placeholder="Subject" value={formData.subject} onChange={handleInputChange} required />
+                </div>
+                <div className="form-group">
+                  <select id="ticketClient" value={formData.client} onChange={handleInputChange} required>
+                    <option value="">Select client</option>
+                    {clients.map(client => (
+                      <option key={client} value={client}>{client}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <select id="ticketPriority" value={formData.priority} onChange={handleInputChange}>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <textarea id="ticketDescription" placeholder="Describe the issue..." value={formData.description} onChange={handleInputChange} required></textarea>
+                </div>
+                <div className="form-group">
+                  <label>Attachments</label>
+                  <input type="file" id="ticketAttachments" onChange={handleInputChange} multiple />
+                </div>
+                <button type="submit" className="btn-primary">Create Ticket</button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

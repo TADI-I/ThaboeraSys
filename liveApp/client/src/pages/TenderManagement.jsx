@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './TenderManagement.css'; // Reuse existing styles
+import Sidebar from '../components/Sidebar';
 
 const TenderManagement = () => {
   const [tenders, setTenders] = useState([]);
@@ -33,8 +34,33 @@ const TenderManagement = () => {
     return () => clearTimeout(timeout);
   }, [search, status]);
 
+  async function simulateAPICall(url, data = null, method = null) {
+  try {
+    const options = {
+      method,
+      headers: { "Content-Type": "application/json" },
+    };
+
+    if (data) {
+      options.body = JSON.stringify(data);
+    }
+
+    const res = await fetch(url, options);
+    const result = await res.json();
+
+    if (!res.ok) {
+      console.error(`API Error [${method} ${url}]:`, result.message || res.statusText);
+      return { success: false, message: result.message || "API call failed" };
+    }
+
+    return result;
+  } catch (err) {
+    console.error(`Fetch error [${method} ${url}]:`, err);
+    return { success: false, message: "Network error" };
+  }
+}
   const loadTenders = async () => {
-    const response = await simulateAPICall(`/api/tenders?search=${search}&status=${status}`);
+    const response = await simulateAPICall(`/api/tenders?search=${search}&status=${status}` , null, "GETNM");
     if (response.success) setTenders(response.data);
   };
 
@@ -62,7 +88,6 @@ const TenderManagement = () => {
     formData.append('description', form.description);
     formData.append('deadline', form.deadline);
     formData.append('status', form.status);
-    form.assignedStaff.forEach(staffId => formData.append('assignedStaff[]', staffId));
     form.files.forEach(file => formData.append('files', file));
 
     const url = form.id ? `/api/tenders/${form.id}` : '/api/tenders';
@@ -105,98 +130,101 @@ const TenderManagement = () => {
   const formatDate = (str) => new Date(str).toLocaleString();
 
   return (
-    <div className="tenders-container">
-      <h1>Tenders</h1>
-      <div className="tender-actions">
-        <button className="btn-primary" onClick={openCreateModal}>Create Tender</button>
-        <div className="tender-filters">
-          <select value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="">All Statuses</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
-            <option value="awarded">Awarded</option>
-          </select>
-          <input
-            type="text"
-            placeholder="Search tenders..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <table id="tendersTable">
-        <thead>
-          <tr>
-            <th>Tender #</th>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Deadline</th>
-            <th>Assigned To</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tenders.map(t => (
-            <tr key={t.id}>
-              <td>{t.referenceNumber}</td>
-              <td>{t.title}</td>
-              <td><span className={`status-${t.status.toLowerCase()}`}>{t.status}</span></td>
-              <td>{formatDate(t.deadline)}</td>
-              <td>{t.assignedStaff.map(s => s.name).join(', ')}</td>
-              <td className="actions">
-                <button onClick={() => window.location.href = `tender-detail.html?id=${t.id}`}>View</button>
-                <button onClick={() => handleEdit(t.id)}>Edit</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={() => setShowModal(false)}>&times;</span>
-            <h2>{form.id ? 'Edit Tender' : 'Create New Tender'}</h2>
-            <form onSubmit={handleSubmit}>
-              <input type="hidden" name="id" value={form.id} />
-              <div className="form-group">
-                <input type="text" name="title" placeholder="Tender Title" value={form.title} onChange={handleInputChange} required />
-              </div>
-              <div className="form-group">
-                <textarea name="description" placeholder="Description" value={form.description} onChange={handleInputChange} required />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Deadline</label>
-                  <input type="date" name="deadline" value={form.deadline} onChange={handleInputChange} required />
-                </div>
-                <div className="form-group">
-                  <label>Status</label>
-                  <select name="status" value={form.status} onChange={handleInputChange}>
-                    <option value="open">Open</option>
-                    <option value="closed">Closed</option>
-                    <option value="awarded">Awarded</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Assigned Staff</label>
-                <select name="assignedStaff" multiple value={form.assignedStaff} onChange={handleInputChange}>
-                  {staffList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Attachments</label>
-                <input type="file" name="files" multiple onChange={handleInputChange} />
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="btn-primary">Save Tender</button>
-              </div>
-            </form>
+    <div className="main-view">
+      <Sidebar />
+      <div className="tenders-container">
+        <h1>Tenders</h1>
+        <div className="tender-actions">
+          <button className="btn-primary" onClick={openCreateModal}>Create Tender</button>
+          <div className="tender-filters">
+            <select value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+              <option value="awarded">Awarded</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Search tenders..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
         </div>
-      )}
+
+        <table id="tendersTable">
+          <thead>
+            <tr>
+              <th>Tender #</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Deadline</th>
+              <th>Assigned To</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tenders.map(t => (
+              <tr key={t.id}>
+                <td>{t.referenceNumber}</td>
+                <td>{t.title}</td>
+                <td><span className={`status-${t.status.toLowerCase()}`}>{t.status}</span></td>
+                <td>{formatDate(t.deadline)}</td>
+                <td>{t.assignedStaff.map(s => s.name).join(', ')}</td>
+                <td className="actions">
+                  <button onClick={() => window.location.href = `tender-detail.html?id=${t.id}`}>View</button>
+                  <button onClick={() => handleEdit(t.id)}>Edit</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {showModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <span className="close" onClick={() => setShowModal(false)}>&times;</span>
+              <h2>{form.id ? 'Edit Tender' : 'Create New Tender'}</h2>
+              <form onSubmit={handleSubmit}>
+                <input type="hidden" name="id" value={form.id} />
+                <div className="form-group">
+                  <input type="text" name="title" placeholder="Tender Title" value={form.title} onChange={handleInputChange} required />
+                </div>
+                <div className="form-group">
+                  <textarea name="description" placeholder="Description" value={form.description} onChange={handleInputChange} required />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Deadline</label>
+                    <input type="date" name="deadline" value={form.deadline} onChange={handleInputChange} required />
+                  </div>
+                  <div className="form-group">
+                    <label>Status</label>
+                    <select name="status" value={form.status} onChange={handleInputChange}>
+                      <option value="open">Open</option>
+                      <option value="closed">Closed</option>
+                      <option value="awarded">Awarded</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Assigned Staff</label>
+                  <select name="assignedStaff" multiple value={form.assignedStaff} onChange={handleInputChange}>
+                    {staffList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Attachments</label>
+                  <input type="file" name="files" multiple onChange={handleInputChange} />
+                </div>
+                <div className="form-actions">
+                  <button type="submit" className="btn-primary">Save Tender</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import './create-quotation.css'; // Assuming you have a CSS file for styling
+import Sidebar from '../components/Sidebar';
 
 const simulateAPICall = (url, data = {}, method = 'GET') => {
   console.log(`API Call: ${method} ${url}`, data);
@@ -146,74 +147,80 @@ export default function QuotationForm() {
   };
 
   return (
-    
-    <form onSubmit={handleSubmit}>
-      <div className="form-row">
-        <div className="form-group">
-          <label>Client</label>
-          <select value={quotation.clientId} onChange={e => setQuotation({ ...quotation, clientId: e.target.value })} required>
-            <option value="">Select Client</option>
-            {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Quotation Date</label>
-          <input type="date" value={quotation.quotationDate} onChange={e => setQuotation({ ...quotation, quotationDate: e.target.value })} required />
-        </div>
-        <div className="form-group">
-          <label>Due Date</label>
-          <input type="date" value={quotation.dueDate} onChange={e => setQuotation({ ...quotation, dueDate: e.target.value })} required />
-        </div>
-      </div>
-      <h3>Items</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Item</th><th>Description</th><th>Qty</th><th>Price</th><th>Total</th><th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item, i) => (
-            <tr key={i}>
-              <td>
-                <select value={item.id} onChange={e => handleItemChange(i, 'id', e.target.value)}>
-                  <option value=''>Select</option>
-                  {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+    <>
+      <div className="main-view">
+        <Sidebar />
+        <div className="document-creation-container">
+          <form onSubmit={handleSubmit}>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Client</label>
+                <select value={quotation.clientId} onChange={e => setQuotation({ ...quotation, clientId: e.target.value })} required>
+                  <option value="">Select Client</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
-              </td>
-              <td><input value={item.description} onChange={e => handleItemChange(i, 'description', e.target.value)} /></td>
-              <td><input type='number' value={item.quantity} min='1' onChange={e => handleItemChange(i, 'quantity', e.target.value)} /></td>
-              <td><input type='number' value={item.price} step='0.01' onChange={e => handleItemChange(i, 'price', e.target.value)} /></td>
-              <td>{(item.quantity * item.price).toFixed(2)}</td>
-              <td><button type='button' onClick={() => removeItemRow(i)}>🗑️</button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button type='button' onClick={addItemRow}>Add Item</button>
+              </div>
+              <div className="form-group">
+                <label>Quotation Date</label>
+                <input type="date" value={quotation.quotationDate} onChange={e => setQuotation({ ...quotation, quotationDate: e.target.value })} required />
+              </div>
+              <div className="form-group">
+                <label>Due Date</label>
+                <input type="date" value={quotation.dueDate} onChange={e => setQuotation({ ...quotation, dueDate: e.target.value })} required />
+              </div>
+            </div>
+            <h3>Items</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th><th>Description</th><th>Qty</th><th>Price</th><th>Total</th><th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item, i) => (
+                  <tr key={i}>
+                    <td>
+                      <select value={item.id} onChange={e => handleItemChange(i, 'id', e.target.value)}>
+                        <option value=''>Select</option>
+                        {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                    </td>
+                    <td><input value={item.description} onChange={e => handleItemChange(i, 'description', e.target.value)} /></td>
+                    <td><input type='number' value={item.quantity} min='1' onChange={e => handleItemChange(i, 'quantity', e.target.value)} /></td>
+                    <td><input type='number' value={item.price} step='0.01' onChange={e => handleItemChange(i, 'price', e.target.value)} /></td>
+                    <td>{(item.quantity * item.price).toFixed(2)}</td>
+                    <td><button type='button' onClick={() => removeItemRow(i)}>🗑️</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button type='button' onClick={addItemRow}>Add Item</button>
 
-      <div>
-        <div>Subtotal: {subtotal.toFixed(2)}</div>
-        <div>
-          <label>Discount:</label>
-          <input type='number' value={quotation.discount} onChange={e => setQuotation({ ...quotation, discount: parseFloat(e.target.value) || 0 })} />
+            <div>
+              <div>Subtotal: {subtotal.toFixed(2)}</div>
+              <div>
+                <label>Discount:</label>
+                <input type='number' value={quotation.discount} onChange={e => setQuotation({ ...quotation, discount: parseFloat(e.target.value) || 0 })} />
+              </div>
+              <div>Tax: {taxAmount.toFixed(2)}</div>
+              <div>Total: {grandTotal.toFixed(2)}</div>
+            </div>
+
+            <div>
+              <label>Notes</label>
+              <textarea value={quotation.notes} onChange={e => setQuotation({ ...quotation, notes: e.target.value })} />
+            </div>
+            <div>
+              <label>Terms</label>
+              <textarea value={quotation.terms} onChange={e => setQuotation({ ...quotation, terms: e.target.value })} />
+            </div>
+
+            <button type="submit">Save</button>
+            <button type="button" onClick={e => handleSubmit(e, true)}>Preview</button>
+            <button type="button" onClick={e => handleSubmit(e, false, true)}>Send</button>
+          </form>
         </div>
-        <div>Tax: {taxAmount.toFixed(2)}</div>
-        <div>Total: {grandTotal.toFixed(2)}</div>
       </div>
-
-      <div>
-        <label>Notes</label>
-        <textarea value={quotation.notes} onChange={e => setQuotation({ ...quotation, notes: e.target.value })} />
-      </div>
-      <div>
-        <label>Terms</label>
-        <textarea value={quotation.terms} onChange={e => setQuotation({ ...quotation, terms: e.target.value })} />
-      </div>
-
-      <button type="submit">Save</button>
-      <button type="button" onClick={e => handleSubmit(e, true)}>Preview</button>
-      <button type="button" onClick={e => handleSubmit(e, false, true)}>Send</button>
-    </form>
+    </>
   );
 }

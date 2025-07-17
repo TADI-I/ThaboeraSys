@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Notifications.css';
+import Sidebar from '../components/Sidebar';
 
 const sampleNotifications = [
   {
@@ -71,70 +72,75 @@ export default function Notifications() {
   const filtered = filterNotifications(activeTab);
 
   return (
-    <div className="notifications-container">
-      <h1><i className="fas fa-bell"></i> Notifications</h1>
+    <>
+      <div className="main-view">
+        <Sidebar />
+        <div className="notifications-container">
+          <h1><i className="fas fa-bell"></i> Notifications</h1>
 
-      <div className="notification-actions">
-        <button onClick={markAllAsRead} className="btn-secondary">
-          <i className="fas fa-check-double"></i> Mark All as Read
-        </button>
-        <button onClick={clearAll} className="btn-secondary">
-          <i className="fas fa-trash-alt"></i> Clear All
-        </button>
-      </div>
-
-      <div className="notification-tabs">
-        {tabs.map(tab => (
-          <button
-            key={tab.key}
-            className={`tab-btn ${activeTab === tab.key ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.key)}
-          >
-            <i className={`fas fa-${tab.icon}`}></i>
-            {tab.key.charAt(0).toUpperCase() + tab.key.slice(1)}
-            <span className="tab-badge">
-              {tab.key === 'all'
-                ? notifications.length
-                : filterNotifications(tab.key).length}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <div className="notifications-list">
-        {filtered.length > 0 ? (
-          filtered.map(n => (
-            <div
-              key={n.id}
-              className={`notification-item ${n.unread ? 'unread' : ''}`}
-            >
-              {n.unread && <div className="unread-badge"></div>}
-              <div className={`notification-icon ${n.type}`}>
-                <i className={`fas fa-${n.icon}`}></i>
-              </div>
-              <div className="notification-content">
-                <h3>{n.title}</h3>
-                <p>{n.message}</p>
-                <span className="notification-time">
-                  <i className="far fa-clock"></i> {n.time}
-                </span>
-              </div>
-              <button
-                className="notification-dismiss"
-                title="Dismiss"
-                onClick={() => dismissNotification(n.id)}
-              >
-                &times;
-              </button>
-            </div>
-          ))
-        ) : (
-          <div className="empty-state">
-            <i className="far fa-bell-slash"></i>
-            <p>No {activeTab} notifications found</p>
+          <div className="notification-actions">
+            <button onClick={markAllAsRead} className="btn-secondary">
+              <i className="fas fa-check-double"></i> Mark All as Read
+            </button>
+            <button onClick={clearAll} className="btn-secondary">
+              <i className="fas fa-trash-alt"></i> Clear All
+            </button>
           </div>
-        )}
+
+          <div className="notification-tabs">
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                className={`tab-btn ${activeTab === tab.key ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                <i className={`fas fa-${tab.icon}`}></i>
+                {tab.key.charAt(0).toUpperCase() + tab.key.slice(1)}
+                <span className="tab-badge">
+                  {tab.key === 'all'
+                    ? notifications.length
+                    : filterNotifications(tab.key).length}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="notifications-list">
+            {filtered.length > 0 ? (
+              filtered.map(n => (
+                <div
+                  key={n.id}
+                  className={`notification-item ${n.unread ? 'unread' : ''}`}
+                >
+                  {n.unread && <div className="unread-badge"></div>}
+                  <div className={`notification-icon ${n.type}`}>
+                    <i className={`fas fa-${n.icon}`}></i>
+                  </div>
+                  <div className="notification-content">
+                    <h3>{n.title}</h3>
+                    <p>{n.message}</p>
+                    <span className="notification-time">
+                      <i className="far fa-clock"></i> {n.time}
+                    </span>
+                  </div>
+                  <button
+                    className="notification-dismiss"
+                    title="Dismiss"
+                    onClick={() => dismissNotification(n.id)}
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="empty-state">
+                <i className="far fa-bell-slash"></i>
+                <p>No {activeTab} notifications found</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
