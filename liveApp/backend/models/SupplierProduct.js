@@ -1,6 +1,6 @@
 // models/SupplierProduct.js
 module.exports = (sequelize, DataTypes) => {
-  return sequelize.define('SupplierProduct', {
+  return sequelize.define('supplier_product', {
     supplierId: {
       type: DataTypes.INTEGER,
       references: {

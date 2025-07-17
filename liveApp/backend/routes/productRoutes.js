@@ -1,25 +1,69 @@
-// routes/products.js
 const express = require('express');
 const router = express.Router();
+const { Op } = require('sequelize');
+const upload = require('../middleware/upload');
 const Product = require('../models/Product');
-const upload = require('../middleware/upload'); // ⬅️ multer setup
 
-// Get all products (with optional search & filter)
+// Helper function for error responses
+const errorResponse = (res, status, message, error = null) => {
+  console.error(error?.message || message);
+  return res.status(status).json({ 
+    success: false, 
+    message,
+    ...(process.env.NODE_ENV === 'development' && { error: error?.message }) 
+  });
+};
+
+// Get all products with pagination and filters
 router.get('/', async (req, res) => {
-  const { search = '', category = '' } = req.query;
   try {
-    let where = {};
-    if (search) {
-      where.name = { [Op.iLike]: `%${search}%` };
+    const { 
+      search = '', 
+      category = '', 
+      minPrice, 
+      maxPrice,
+      page = 1, 
+      limit = 10 
+    } = req.query;
+
+    // Build query conditions
+    const where = {};
+    if (search) where.name = { [Op.iLike]: `%${search}%` };
+    if (category) where.categoryId = category;
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price[Op.gte] = parseFloat(minPrice);
+      if (maxPrice) where.price[Op.lte] = parseFloat(maxPrice);
     }
-    if (category) {
-      where.categoryId = category;
-    }
-    const products = await Product.findAll({ where });
-    res.json({ success: true, data: products });
+
+    const offset = (page - 1) * limit;
+    
+    const { count, rows: products } = await Product.findAndCountAll({
+      where,
+      limit: parseInt(limit),
+      offset: offset,
+      order: [['createdAt', 'DESC']]
+    });
+
+    // Map quantityInStock to stock for frontend compatibility
+    const mappedProducts = products.map(p => ({
+      ...p.toJSON(),
+      stock: p.quantityInStock
+    }));
+
+    return res.json({
+      success: true,
+      data: mappedProducts,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        pages: Math.ceil(count / limit),
+        limit: parseInt(limit)
+      }
+    });
+
   } catch (err) {
-    console.error('Fetch failed:', err);
-    res.status(500).json({ message: 'Server error' });
+    return errorResponse(res, 500, 'Failed to fetch products', err);
   }
 });
 
@@ -27,27 +71,58 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Not found' });
-    res.json({ success: true, data: product });
+    if (!product) return errorResponse(res, 404, 'Product not found');
+    const mapped = { ...product.toJSON(), stock: product.quantityInStock };
+    return res.json({ success: true, data: mapped });
   } catch (err) {
-    res.status(500).json({ message: 'Fetch error' });
+    return errorResponse(res, 500, 'Failed to fetch product', err);
   }
 });
 
-// Create product
+// Create new product
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const { name, description, price, stock, cost, category, sku, reorderLevel } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!req.body.name || !req.body.price) {
+      return errorResponse(res, 400, 'Name and price are required');
+    }
+
+    const {
+      name,
+      description,
+      price,
+      cost,
+      sku,
+      reorderLevel = 0,
+      categoryId,
+      stock // <-- from frontend
+    } = req.body;
+
+    // Check for duplicate SKU
+    if (sku) {
+      const existing = await Product.findOne({ where: { sku } });
+      if (existing) {
+        return errorResponse(res, 400, 'SKU already exists');
+      }
+    }
+
     const newProduct = await Product.create({
-      name, description, price, cost, sku,
-      quantityInStock: stock,
-      reorderLevel, categoryId: category, image
+      name,
+      description,
+      price: parseFloat(price),
+      cost: cost ? parseFloat(cost) : null,
+      sku: sku?.trim() ? sku : null,
+      quantityInStock: stock !== undefined ? parseInt(stock) : 0, // <-- map stock
+      reorderLevel: reorderLevel !== undefined ? parseInt(reorderLevel) : 0,
+      categoryId: categoryId ? parseInt(categoryId) : null,
+      image: req.file ? `/uploads/${req.file.filename}` : null
     });
-    res.status(201).json({ success: true, data: newProduct });
+
+    return res.status(201).json({
+      success: true,
+      data: newProduct
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Create error' });
+    return errorResponse(res, 500, 'Failed to create product', err);
   }
 });
 
@@ -55,32 +130,58 @@ router.post('/', upload.single('image'), async (req, res) => {
 router.put('/:id', upload.single('image'), async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Not found' });
+    if (!product) return errorResponse(res, 404, 'Product not found');
 
-    const { name, description, price, stock, cost, category, sku, reorderLevel } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : product.image;
+    const {
+      name,
+      description,
+      price,
+      cost,
+      sku,
+      reorderLevel,
+      categoryId,
+      stock // <-- from frontend
+    } = req.body;
+
+    // Check for duplicate SKU if changed
+    if (sku && sku !== product.sku) {
+      const existing = await Product.findOne({ where: { sku } });
+      if (existing) return errorResponse(res, 400, 'SKU already exists');
+    }
 
     await product.update({
-      name, description, price, cost, sku,
-      quantityInStock: stock,
-      reorderLevel, categoryId: category, image
+      name: name || product.name,
+      description: description !== undefined ? description : product.description,
+      price: price !== undefined ? parseFloat(price) : product.price,
+      cost: cost !== undefined ? parseFloat(cost) : product.cost,
+      sku: sku || product.sku,
+      quantityInStock: stock !== undefined ? parseInt(stock) : product.quantityInStock, // <-- map stock
+      reorderLevel: reorderLevel !== undefined ? parseInt(reorderLevel) : product.reorderLevel,
+      categoryId: categoryId !== undefined ? parseInt(categoryId) : product.categoryId,
+      image: req.file ? `/uploads/${req.file.filename}` : product.image
     });
-    res.json({ success: true, data: product });
+
+    return res.json({
+      success: true,
+      data: product
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Update error' });
+    return errorResponse(res, 500, 'Failed to update product', err);
   }
 });
 
-// Delete
+// Delete product
 router.delete('/:id', async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Not found' });
+    if (!product) return errorResponse(res, 404, 'Product not found');
+    
     await product.destroy();
-    res.json({ success: true });
+    return res.json({ success: true, message: 'Product deleted' });
+    
   } catch (err) {
-    res.status(500).json({ message: 'Delete error' });
+    return errorResponse(res, 500, 'Failed to delete product', err);
   }
 });
 

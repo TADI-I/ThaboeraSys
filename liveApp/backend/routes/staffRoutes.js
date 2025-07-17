@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Staff } = require('../models/Staff');
+const Staff = require('../models/Staff');
 
 // GET all staff members
 router.get('/', async (req, res) => {
@@ -25,11 +25,23 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// GET staff by email (for profile loading)
+router.get('/by-email/:email', async (req, res) => {
+  try {
+    const staff = await Staff.findOne({ where: { email: req.params.email } });
+    if (!staff) return res.status(404).json({ message: 'Staff member not found' });
+    res.json(staff);
+  } catch (err) {
+    console.error('Error fetching staff by email:', err);
+    res.status(500).json({ message: 'Failed to fetch staff' });
+  }
+});
+
 // POST create a new staff member
 router.post('/', async (req, res) => {
   try {
-    const { name, role, email, phone } = req.body;
-    const newStaff = await Staff.create({ name, role, email, phone });
+    const { firstName, lastName, email, phone, position } = req.body;
+    const newStaff = await Staff.create({ firstName, lastName, email, phone, position });
     res.status(201).json(newStaff);
   } catch (err) {
     console.error('Error creating staff:', err);
@@ -43,8 +55,8 @@ router.put('/:id', async (req, res) => {
     const staff = await Staff.findByPk(req.params.id);
     if (!staff) return res.status(404).json({ message: 'Staff member not found' });
 
-    const { name, role, email, phone } = req.body;
-    await staff.update({ name, role, email, phone });
+    const { firstName, lastName, email, phone, position } = req.body;
+    await staff.update({ firstName, lastName, email, phone, position });
     res.json(staff);
   } catch (err) {
     console.error('Error updating staff:', err);

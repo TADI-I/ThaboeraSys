@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 
-const Supplier = sequelize.define('supplier', {
+const Supplier = sequelize.define('supplier/reseller', {
   name: DataTypes.STRING,
   contactPerson: DataTypes.STRING,
   email: DataTypes.STRING,

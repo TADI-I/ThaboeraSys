@@ -12,7 +12,6 @@ app.use(express.json());
 // Import models (this ensures associations are loaded if needed)
 require('./models/User');
 require('./models/Company');
-require('./models/Reseller');
 require('./models/Product');
 require('./models/Invoice');
 require('./models/Quotation');
@@ -36,7 +35,6 @@ const productRoutes = require('./routes/productRoutes');
 const companyRoutes = require('./routes/companyRoutes');
 const staffRoutes = require('./routes/staffRoutes');
 const fileRoutes = require('./routes/fileRoutes');
-const resellerRoutes = require('./routes/resellerRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 app.use('/api/suppliers', supplierRoutes);
@@ -46,6 +44,7 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/documents', require('./routes/fileRoutes'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api', require('./routes/authRoutes'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Handles /login, /register, /me inside
 
 app.use('/api/invoices', invoiceRoutes);
@@ -56,7 +55,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/staff', staffRoutes);
 app.use('/api/files', fileRoutes);
-app.use('/api/resellers', resellerRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/documents', fileRoutes);
 
