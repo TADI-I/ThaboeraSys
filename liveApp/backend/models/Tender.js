@@ -2,6 +2,11 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Tender = sequelize.define('Tender', {
+  referenceNumber: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
   title: {
     type: DataTypes.STRING,
     allowNull: false
@@ -15,11 +20,19 @@ const Tender = sequelize.define('Tender', {
     allowNull: false
   },
   status: {
-    type: DataTypes.ENUM('Open', 'Closed', 'Awarded'),
-    defaultValue: 'Open'
+    type: DataTypes.ENUM('open', 'closed', 'awarded'),
+    defaultValue: 'open'
   }
 }, {
-  tableName: 'tenders'
+  tableName: 'tenders',
+  hooks: {
+    beforeCreate: (tender) => {
+      // Generate reference number
+      if (!tender.referenceNumber) {
+        tender.referenceNumber = `TND-${Date.now()}`;
+      }
+    }
+  }
 });
 
 module.exports = Tender;
