@@ -128,7 +128,7 @@ export default function SupplierManagement() {
       suppliedProducts: [],
       rawSuppliedProducts: "",
     });
-
+    console.log("Setting modalOpen to true"); // Debug log
     setModalOpen(true);
   }
 
@@ -322,7 +322,10 @@ export default function SupplierManagement() {
 
           <div className="table-actions">
             <button
-              onClick={openAddModal}
+               onClick={(e) => {
+    e.stopPropagation();
+    openAddModal();
+  }}
               className="btn-primary"
             >
               <IconPlus />
@@ -364,7 +367,7 @@ export default function SupplierManagement() {
 
           {/* Modal */}
           {modalOpen && (
-            <div className="modal" style={{ display: "block" }}>
+            <div className="modal open">
               <div className="modal-content" ref={modalRef}>
                 <span
                   className="close"

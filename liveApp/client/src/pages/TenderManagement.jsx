@@ -13,10 +13,9 @@ const TenderManagement = () => {
     description: '',
     deadline: '',
     status: 'open',
-    assignedStaff: [],
     files: []
   });
-  const [staffList, setStaffList] = useState([]);
+  
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -34,15 +33,21 @@ const TenderManagement = () => {
     return () => clearTimeout(timeout);
   }, [search, status]);
 
-  async function simulateAPICall(url, data = null, method = null) {
+ // Update the simulateAPICall function to handle FormData
+async function simulateAPICall(url, data = null, method = "GET", isFormData = false) {
   try {
     const options = {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: {}
     };
 
+    // Only set Content-Type for JSON, not for FormData
+    if (!isFormData) {
+      options.headers['Content-Type'] = 'application/json';
+    }
+
     if (data) {
-      options.body = JSON.stringify(data);
+      options.body = isFormData ? data : JSON.stringify(data);
     }
 
     const res = await fetch(url, options);
@@ -59,15 +64,17 @@ const TenderManagement = () => {
     return { success: false, message: "Network error" };
   }
 }
-  const loadTenders = async () => {
-    const response = await simulateAPICall(`/api/tenders?search=${search}&status=${status}` , null, "GETNM");
-    if (response.success) setTenders(response.data);
-  };
 
-  const loadStaff = async () => {
-    const response = await simulateAPICall('/api/users?role=staff');
-    if (response.success) setStaffList(response.data);
-  };
+// Update loadTenders function
+const loadTenders = async () => {
+  const response = await simulateAPICall(
+    `/api/tenders?search=${search}&status=${status}`,
+    null,
+    "GET"
+  );
+  if (response.success) setTenders(response.data);
+};
+
 
   const handleInputChange = (e) => {
     const { name, value, type, files, options } = e.target;
@@ -81,31 +88,54 @@ const TenderManagement = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!form.title || !form.deadline) {
+    alert('Title and Deadline are required fields');
+    return;
+  }
+
+  try {
     const formData = new FormData();
     formData.append('title', form.title);
-    formData.append('description', form.description);
+    formData.append('description', form.description || '');
     formData.append('deadline', form.deadline);
     formData.append('status', form.status);
-    form.files.forEach(file => formData.append('files', file));
+
+    // Log FormData contents
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
 
     const url = form.id ? `/api/tenders/${form.id}` : '/api/tenders';
     const method = form.id ? 'PUT' : 'POST';
+    
     const response = await simulateAPICall(url, formData, method, true);
+    
     if (response.success) {
       alert(`Tender ${form.id ? 'updated' : 'created'} successfully!`);
       setShowModal(false);
-      setForm({ id: '', title: '', description: '', deadline: '', status: 'open', assignedStaff: [], files: [] });
+      setForm({ 
+        id: '', 
+        title: '', 
+        description: '', 
+        deadline: '', 
+        status: 'open', 
+        files: [] 
+      });
       loadTenders();
     } else {
       alert(response.message || 'Operation failed');
     }
-  };
-
+  } catch (error) {
+    console.error('Submission error:', error);
+    alert('An error occurred while saving the tender');
+  }
+};
   const openCreateModal = () => {
-    setForm({ id: '', title: '', description: '', deadline: '', status: 'open', assignedStaff: [], files: [] });
-    loadStaff();
+    setForm({ id: '', title: '', description: '', deadline: '', status: 'open', files: [] });
+   
     setShowModal(true);
   };
 
@@ -119,10 +149,9 @@ const TenderManagement = () => {
         description: t.description,
         deadline: t.deadline.split('T')[0],
         status: t.status,
-        assignedStaff: t.assignedStaff.map(s => s.id),
         files: []
       });
-      await loadStaff();
+      
       setShowModal(true);
     }
   };
@@ -159,25 +188,47 @@ const TenderManagement = () => {
               <th>Title</th>
               <th>Status</th>
               <th>Deadline</th>
-              <th>Assigned To</th>
+              
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {tenders.map(t => (
-              <tr key={t.id}>
-                <td>{t.referenceNumber}</td>
-                <td>{t.title}</td>
-                <td><span className={`status-${t.status.toLowerCase()}`}>{t.status}</span></td>
-                <td>{formatDate(t.deadline)}</td>
-                <td>{t.assignedStaff.map(s => s.name).join(', ')}</td>
-                <td className="actions">
-                  <button onClick={() => window.location.href = `tender-detail.html?id=${t.id}`}>View</button>
-                  <button onClick={() => handleEdit(t.id)}>Edit</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {tenders.length > 0 ? (
+    tenders.map(t => (
+      <tr key={t.id}>
+        <td>{t.referenceNumber || 'N/A'}</td>
+        <td>{t.title}</td>
+        <td>
+          <span className={`status-${t.status.toLowerCase()}`}>
+            {formatStatus(t.status)}
+          </span>
+        </td>
+        <td>{formatDeadline(t.deadline)}</td>
+        
+        <td className="actions">
+          <button 
+            className="btn-view"
+            onClick={() => window.location.href = `tender-detail.html?id=${t.id}`}
+          >
+            View
+          </button>
+          <button 
+            className="btn-edit"
+            onClick={() => handleEdit(t.id)}
+          >
+            Edit
+          </button>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="6" className="empty-state">
+        No tenders found
+      </td>
+    </tr>
+  )}
+</tbody>
         </table>
 
         {showModal && (
@@ -207,12 +258,7 @@ const TenderManagement = () => {
                     </select>
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>Assigned Staff</label>
-                  <select name="assignedStaff" multiple value={form.assignedStaff} onChange={handleInputChange}>
-                    {staffList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
-                </div>
+                
                 <div className="form-group">
                   <label>Attachments</label>
                   <input type="file" name="files" multiple onChange={handleInputChange} />

@@ -114,7 +114,7 @@ const Quotations = () => {
                     <td>{quote.quoteNumber}</td>
                     <td>{quote.client.name}</td>
                     <td>{formatDate(quote.date)}</td>
-                    <td>${quote.total.toFixed(2)}</td>
+                    <td>R{quote.total.toFixed(2)}</td>
                     <td><span className={`status-${quote.status.toLowerCase()}`}>{quote.status}</span></td>
                     <td>{formatDate(quote.expiryDate)}</td>
                     <td className="actions">
