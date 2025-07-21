@@ -8,6 +8,7 @@ const sequelize = require('./config/database');
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Import models (this ensures associations are loaded if needed)
 require('./models/User');
