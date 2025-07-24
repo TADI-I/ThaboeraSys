@@ -9,6 +9,11 @@
   align-items: center;
 }
 
+.company-logo {
+  width: 10%;
+  height: 10%;
+  margin-bottom: 5%;
+}
 .sidebar .logo {
   margin-bottom: 32px;
   font-size: 1.7rem;

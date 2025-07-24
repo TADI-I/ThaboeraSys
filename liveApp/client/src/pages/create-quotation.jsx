@@ -244,7 +244,7 @@ const CreateQuotation = () => {
           {/* Company Info Box */}
           <div className="framed-section company-info">
             <div className="company-logo">
-              <img src={logo} />
+              <img src={logo} alt="Company Logo" style={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'contain' }} />
             </div>
             <div className="company-info-text">
               <h2>Thabo<span style={{ color: 'red' }}>era</span> IT Solutions</h2>

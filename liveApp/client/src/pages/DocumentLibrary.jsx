@@ -3,13 +3,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import './DocumentLibrary.css'; // Assuming you have a CSS file for styles
 import Sidebar from '../components/Sidebar';
 
-const categoriesMock = [
-  { id: 1, name: 'Contracts' },
-  { id: 2, name: 'Invoices' },
-  { id: 3, name: 'Reports' },
-  { id: 4, name: 'Presentations' },
-  { id: 5, name: 'Legal' }
-];
 
 const DocumentLibrary = () => {
   const [auth, setAuth] = useState(true);
@@ -36,6 +29,18 @@ const DocumentLibrary = () => {
   useEffect(() => {
     loadDocuments(search, filter);
   }, [search, filter]);
+
+  useEffect(() => {
+    if (search) {
+      const filteredDocs = documents.filter(doc => 
+        doc.title.toLowerCase().includes(search.toLowerCase()) ||
+        doc.description.toLowerCase().includes(search.toLowerCase())
+      );
+      setDocuments(filteredDocs);
+    } else {
+      loadDocuments();
+    }
+  }, [search]);
 
   const loadDocuments = async () => {
     const res = await fetch('/api/documents');
@@ -133,6 +138,12 @@ const DocumentLibrary = () => {
           </div>
           <div className="document-view-options">
           </div>
+          <div className="search-bar">
+            <input type='text'></input>
+            <button className="btn-secondary" onClick={() => setSearch(document.querySelector('.search-bar input').value)}>
+              <i className="fas fa-search"></i> Search
+            </button>
+            </div>
 
           {view === 'list' ? (
             <div id="documentsList">

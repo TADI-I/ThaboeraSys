@@ -2,9 +2,14 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Tender = sequelize.define('Tender', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   referenceNumber: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
     unique: true
   },
   title: {
@@ -23,6 +28,7 @@ const Tender = sequelize.define('Tender', {
     type: DataTypes.ENUM('open', 'closed', 'awarded'),
     defaultValue: 'open'
   }
+  
 }, {
   tableName: 'tenders',
   hooks: {

@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
     });
 
   } catch (err) {
-    return errorResponse(res, 500, 'Failed to fetch products', err);
+    
   }
 });
 
@@ -75,7 +75,7 @@ router.get('/:id', async (req, res) => {
     const mapped = { ...product.toJSON(), stock: product.quantityInStock };
     return res.json({ success: true, data: mapped });
   } catch (err) {
-    return errorResponse(res, 500, 'Failed to fetch product', err);
+    
   }
 });
 

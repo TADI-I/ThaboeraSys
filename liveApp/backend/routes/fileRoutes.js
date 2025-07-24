@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const File = require('../models/File'); // Sequelize model
-const path = require('path');
-const fs = require('fs');
 
 // Use memory storage for uploading to DB
 const upload = multer({ storage: multer.memoryStorage() });

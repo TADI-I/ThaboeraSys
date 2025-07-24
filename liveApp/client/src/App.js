@@ -5,7 +5,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/login";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/products";
-import SettingsPage from "./pages/SettingsPage";
 import Quotations from "./pages/quotations";
 import CreateQuotation from "./pages/create-quotation";
 import Invoices from "./pages/invoices";
@@ -20,7 +19,6 @@ import TenderManagement from "./pages/TenderManagement";
 import TicketsPage from "./pages/TicketsPage";
 import TicketDetail from "./pages/TicketDetail";
 import AuditLogs from "./pages/audit-logs";
-import CompanySettings from "./pages/company-settings";
 
 function App() {
   return (
@@ -42,8 +40,6 @@ function App() {
       <Route path="/suppliers" element={<Suppliers />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/settings" element={<SettingsPage />} />
-      <Route path="/company-settings" element={<CompanySettings />} />
       <Route path="/user-management" element={<UserManagement />} />
       <Route path="/documents" element={<DocumentLibrary />} />
       <Route path="/tenders" element={<TenderManagement />} />

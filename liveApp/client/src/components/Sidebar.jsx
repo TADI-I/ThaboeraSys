@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import './Sidebar.css';
+import logo from './ThaboEra-Logo.png';
 
 const Sidebar = () => {
   const [sidebarActive, setSidebarActive] = useState(false);
@@ -28,18 +29,20 @@ const Sidebar = () => {
         <i className="fas fa-bars"></i>
       </button>
 
-      {/* Sidebar Navigation */}
-      <nav className={`sidebar${sidebarActive ? ' active' : ''}`}>
-        <div className="sidebar-header">
-          <button className="sidebar-close" onClick={toggleSidebar}>
-            <i className="fas fa-times"></i>
-          </button>
-          <div className="company-logo">IT</div>
-          <h2>ThaboEra IT Solutions</h2>
-        </div>
+      
+        <nav className={`sidebar${sidebarActive ? ' active' : ''}`}>
+          <div className="sidebar-header">
+            <button className="sidebar-close" onClick={toggleSidebar}>
+          <i className="fas fa-times"></i>
+            </button>
+            <div className="company-logo">
+          <img src={logo} alt="Company Logo" style={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'contain' }} />
+            </div>
+            <h2>ThaboEra IT Solutions</h2>
+          </div>
 
-        <div className="sidebar-menu">
-          {/* Dashboard */}
+          <div className="sidebar-menu">
+            {/* Dashboard */}
           <div className="menu-section">
             <a href="/dashboard" className={`menu-item${isActive('/dashboard') ? ' active' : ''}`}>
               <i className="fas fa-tachometer-alt"></i>
@@ -58,10 +61,12 @@ const Sidebar = () => {
               <i className="fas fa-sign-out-alt"></i>
               <span>Logout</span>
             </a>
+            {/*
             <a href="/notifications" className={`menu-item${isActive('/notifications') ? ' active' : ''}`}>
               <i className="fas fa-bell"></i>
               <span>Notifications</span>
             </a>
+            */}
           </div>
 
           {/* User Management */}
@@ -70,10 +75,6 @@ const Sidebar = () => {
             <a href="/user-management" className={`menu-item${isActive('/user-management') ? ' active' : ''}`}>
               <i className="fas fa-users-cog"></i>
               <span>Staff Management</span>
-            </a>
-            <a href="/company-settings" className={`menu-item${isActive('/company-settings') ? ' active' : ''}`}>
-              <i className="fas fa-cog"></i>
-              <span>Company Settings</span>
             </a>
           </div>
 
@@ -122,14 +123,14 @@ const Sidebar = () => {
               <i className="fas fa-chart-line"></i>
               <span>Tenders</span>
             </a>
-            <a href="/sales-reports" className={`menu-item${isActive('/sales-reports') ? ' active' : ''}`}>
+           {/* <a href="/sales-reports" className={`menu-item${isActive('/sales-reports') ? ' active' : ''}`}>
               <i className="fas fa-chart-line"></i>
               <span>Sales Reports</span>
             </a>
             <a href="/stock-reports" className={`menu-item${isActive('/stock-reports') ? ' active' : ''}`}>
               <i className="fas fa-chart-pie"></i>
               <span>Stock Reports</span>
-            </a>
+            </a> */}
             <a href="/audit-logs" className={`menu-item${isActive('/audit-logs') ? ' active' : ''}`}>
               <i className="fas fa-clipboard-list"></i>
               <span>System Logs</span>

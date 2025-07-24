@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './create-invoice.css';
+import logo from '../components/ThaboEra-Logo.png';
 import Sidebar from '../components/Sidebar';
 
 const InvoicePreview = ({ invoice }) => {
@@ -242,7 +243,7 @@ const CreateInvoice = () => {
           {/* Company Info Box */}
           <div className="framed-section company-info">
             <div className="company-logo">
-              <img src="client/src/components/ThaboEra-Logo.png" alt="Company Logo" />
+              <img src={logo} alt="Company Logo" style={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'contain' }} />
             </div>
             <div className="company-info-text">
               <h2>Thabo<span style={{ color: 'red' }}>era</span> IT Solutions</h2>

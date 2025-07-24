@@ -5,17 +5,42 @@ import Sidebar from '../components/Sidebar';
 const TenderManagement = () => {
   const [tenders, setTenders] = useState([]);
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
+  const [statusFilter, setStatusFilter] = useState(''); // For filtering tenders
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     id: '',
     title: '',
     description: '',
     deadline: '',
-    status: 'open',
+    status: 'open', // Default status for new tenders
     files: []
   });
-  
+
+  // Status options for display and filtering
+  function formatStatus(status) {
+    switch (status) {
+      case 'open':
+        return 'Open';
+      case 'closed':
+        return 'Closed';
+      case 'awarded':
+        return 'Awarded';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  function formatDeadline(deadline) {
+    return new Date(deadline).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit', 
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+      
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -36,32 +61,66 @@ const TenderManagement = () => {
  // Update the simulateAPICall function to handle FormData
 async function simulateAPICall(url, data = null, method = "GET", isFormData = false) {
   try {
+    const token = localStorage.getItem('authToken');
     const options = {
       method,
-      headers: {}
+      headers: {
+        'Authorization': `Bearer ${token}` // Add auth header
+      }
     };
 
-    // Only set Content-Type for JSON, not for FormData
-    if (!isFormData) {
-      options.headers['Content-Type'] = 'application/json';
+    // Handle FormData vs JSON
+    if (data) {
+      if (isFormData) {
+        options.body = data;
+        // Don't set Content-Type for FormData - browser will set it automatically
+      } else {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(data);
+      }
     }
 
-    if (data) {
-      options.body = isFormData ? data : JSON.stringify(data);
-    }
+    console.log('Making API call:', { url, options }); // Debug log
 
     const res = await fetch(url, options);
-    const result = await res.json();
-
+    
     if (!res.ok) {
-      console.error(`API Error [${method} ${url}]:`, result.message || res.statusText);
-      return { success: false, message: result.message || "API call failed" };
+      // Try to get error details from response
+      let errorDetails;
+      try {
+        errorDetails = await res.json();
+      } catch (e) {
+        errorDetails = await res.text();
+      }
+      
+      console.error(`API Error [${method} ${url}]:`, {
+        status: res.status,
+        statusText: res.statusText,
+        errorDetails
+      });
+      
+      return { 
+        success: false, 
+        message: errorDetails.message || res.statusText,
+        status: res.status,
+        error: errorDetails
+      };
     }
 
+    const result = await res.json();
     return result;
   } catch (err) {
-    console.error(`Fetch error [${method} ${url}]:`, err);
-    return { success: false, message: "Network error" };
+    console.error(`Network Error [${method} ${url}]:`, {
+      message: err.message,
+      name: err.name,
+      stack: err.stack
+    });
+    
+    return { 
+      success: false, 
+      message: "Network error - failed to reach server",
+      error: err 
+    };
   }
 }
 
@@ -88,51 +147,39 @@ const loadTenders = async () => {
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!form.title || !form.deadline) {
-    alert('Title and Deadline are required fields');
-    return;
-  }
-
-  try {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const formData = new FormData();
     formData.append('title', form.title);
-    formData.append('description', form.description || '');
+    formData.append('description', form.description);
     formData.append('deadline', form.deadline);
     formData.append('status', form.status);
-
-    // Log FormData contents
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
-
-    const url = form.id ? `/api/tenders/${form.id}` : '/api/tenders';
-    const method = form.id ? 'PUT' : 'POST';
-    
-    const response = await simulateAPICall(url, formData, method, true);
-    
-    if (response.success) {
-      alert(`Tender ${form.id ? 'updated' : 'created'} successfully!`);
-      setShowModal(false);
-      setForm({ 
-        id: '', 
-        title: '', 
-        description: '', 
-        deadline: '', 
-        status: 'open', 
-        files: [] 
-      });
-      loadTenders();
+    form.files.forEach(file => {
+      formData.append('files', file);
+    });
+    if (form.id) {
+      formData.append('id', form.id);
+      const response = await simulateAPICall(`/api/tenders/${form.id}`, formData, "PUT", true);
+      if (response.success) {
+        alert('Tender updated successfully'); 
+        setShowModal(false);
+        loadTenders();
+      } else {
+        alert(`Error updating tender: ${response.message || 'Unknown error'}`);
+      }
     } else {
-      alert(response.message || 'Operation failed');
+      const response = await simulateAPICall('/api/tenders', formData, "POST", true);
+      if (response.success) {
+        alert('Tender created successfully');
+        setShowModal(false);
+        setForm({ id: '', title: '', description: '', deadline: '', status: 'open', files: [] });
+        loadTenders();
+      } else {
+        alert(`Error creating tender: ${response.message || 'Unknown error'}`);
+      }
     }
-  } catch (error) {
-    console.error('Submission error:', error);
-    alert('An error occurred while saving the tender');
-  }
-};
+  };
+
   const openCreateModal = () => {
     setForm({ id: '', title: '', description: '', deadline: '', status: 'open', files: [] });
    
@@ -140,23 +187,43 @@ const handleSubmit = async (e) => {
   };
 
   const handleEdit = async (id) => {
+  try {
+ 
     const response = await simulateAPICall(`/api/tenders/${id}`);
+    console.log('Edit response:', response); // Debug log
+    
     if (response.success) {
       const t = response.data;
+      
       setForm({
         id: t.id,
         title: t.title,
-        description: t.description,
-        deadline: t.deadline.split('T')[0],
-        status: t.status,
+        description: t.description || '', // Handle potential null/undefined
+        deadline: t.deadline ? t.deadline.split('T')[0] : '', // Safely handle date
+        status: t.status || 'open', // Default to 'open' if undefined
         files: []
       });
-      
-      setShowModal(true);
-    }
-  };
 
-  const formatDate = (str) => new Date(str).toLocaleString();
+      setShowModal(true);
+      console.log('Modal should be open now'); // Debug log
+    } else {
+      console.error('Failed to fetch tender:', response.message);
+      alert(`Error: ${response.message || 'Failed to load tender data'}`);
+    }
+  } catch (error) {
+    console.error('Edit error:', {
+      message: error.message,
+      stack: error.stack
+    });
+    alert('An error occurred while loading the tender');
+  }
+};
+
+  const resetForm = () => {
+    setForm({ id: '', title: '', description: '', deadline: '', status: 'open', files: [] });
+    setShowModal(false);
+  };
+  
 
   return (
     <div className="main-view">
@@ -164,7 +231,7 @@ const handleSubmit = async (e) => {
       <div className="tenders-container">
         <h1>Tenders</h1>
         <div className="tender-actions">
-          <button className="btn-primary" onClick={openCreateModal}>Create Tender</button>
+          <button className="btn-primary" onClick={openCreateModal}>Add Tender</button>
           <div className="tender-filters">
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">All Statuses</option>
@@ -188,7 +255,6 @@ const handleSubmit = async (e) => {
               <th>Title</th>
               <th>Status</th>
               <th>Deadline</th>
-              
               <th>Actions</th>
             </tr>
           </thead>
@@ -208,13 +274,16 @@ const handleSubmit = async (e) => {
         <td className="actions">
           <button 
             className="btn-view"
-            onClick={() => window.location.href = `tender-detail.html?id=${t.id}`}
+            onClick={() => window.location.href = `/tender-detail.html?id=${t.id}`}
           >
             View
           </button>
           <button 
             className="btn-edit"
-            onClick={() => handleEdit(t.id)}
+            onClick={async () => {
+    console.log('Button clicked for ID:', t.id);
+    await handleEdit(t.id);
+  }}
           >
             Edit
           </button>
@@ -223,7 +292,7 @@ const handleSubmit = async (e) => {
     ))
   ) : (
     <tr>
-      <td colSpan="6" className="empty-state">
+      <td colSpan="5" className="empty-state">
         No tenders found
       </td>
     </tr>

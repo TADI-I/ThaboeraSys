@@ -160,7 +160,7 @@ body {
 }
 
 .sidebar.active + .dashboard-main {
-  margin-left: 280px;
+  margin-left: 0px;
 }
 
 .top-bar {
