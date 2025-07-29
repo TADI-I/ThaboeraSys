@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thaboera IT Solutions Invoice</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="invoice-app">
+
+    <!-- CLIENT INFORMATION -->
+    <section>
+      <h2>Client Information</h2>
+      <input type="text" id="clientName" placeholder="Client Name" />
+      <input type="text" id="contactPerson" placeholder="Contact Person" />
+      <input type="text" id="contactNumber" placeholder="Contact Number" />
+      <input type="email" id="email" placeholder="Email Address" />
+      <input type="text" id="address" placeholder="Address" />
+      <input type="text" id="regNumber" placeholder="Registration Number" />
+      <button onclick="showClientInfo()">Save Client Info</button>
+      <div id="confirmation" style="margin-top: 10px; color: green; font-weight: bold;"></div>
+
+    </section>
+
+    <!-- INVOICE DETAILS SECTION -->
+<section>
+  <h2>Qoutation Details</h2>
+  <input type="text" id="salesRep" placeholder="Sales Rep" />
+  <input type="text" id="fob" placeholder="FOB" />
+  <input type="text" id="shipVia" placeholder="Ship Via" />
+  <input type="text" id="terms" placeholder="Terms" />
+  <input type="text" id="taxId" placeholder="Tax ID" />
+  <input type="date" id="invoiceDate" />
+  <button onclick="showInvoiceDetails()">Save Qoute Details</button>
+  <div id="conf" style="margin-top: 10px; color: green; font-weight: bold;"></div>
+
+</section>
+
+          <!-- ITEM INFORMATION -->
+      <div class="framed-section">
+        <section>
+          <!-- <h2>Invoice Item</h2>-->
+          <input type="text" id="item" placeholder="Item Name" />
+          <input type="text" id="description" placeholder="Description" />
+          <input type="number" id="qty" placeholder="Quantity" />
+          <input type="number" id="unitPrice" placeholder="Unit Price" />
+          <input type="number" id="discount" placeholder="Discount (%)" />
+          <select id="taxable">
+            <option value="yes">Taxable</option>
+            <option value="no">Non-taxable</option>
+          </select>
+          <button onclick="addItem()">Add Item</button>
+        </section>
+      </div>
+  <!-- WRAP ALL INVOICE CONTENT -->
+
+    <!-- COMPANY INFORMATION -->
+    <div class="framed-section company-info">
+  <!-- Logo -->
+  <div class="company-logo">
+    <img src="img/ThaboEra-Logo.png" alt="Company Logo" />
+  </div> 
+
+  <!-- Text -->
+  <div class="company-info-text">
+    <h2>Thabo<span style="color: red;">era</span> IT Solutions</h2>
+    <p><strong class="slogan">Bridge Your IT Gap</strong></p>
+    <p>55 Richard's Drive, Halfway House, Midrand | www.thaboera.co.za </p>
+    <p>Email: info@thaboera.co.za | Tel: +27(0) 11 051 3906 | WhatsApp: +27 61 541 4097</p>
+    <p><strong id="vatNumber">VAT No.: 482027225 | Reg: 2006/184754/23</strong></p>
+    <p><strong id="invoiceNumber">Invoice No: </strong></p>
+  </div>
+</div>
+
+
+    <!-- DISPLAY CLIENT INFO -->
+    <div id="clientInfoDisplay" class="client-box"></div>
+
+    <div id="invoiceDetailsDisplay" class="invoice-details-box"></div>
+
+  
+
+    <!-- DISPLAY INVOICE ITEMS -->
+     <!-- INVOICE TABLE -->
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Discount</th>
+          <th>Taxable</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceBody"></tbody>
+    </table>
+
+   
+
+    <!-- TOTALS -->
+    <div class="totals">
+      <p>Subtotal: R <span id="subtotal">0.00</span></p>
+      <p>VAT (15%): R <span id="vat">0.00</span></p>
+      <h3>Total: R <span id="total">0.00</span></h3>
+    </div>
+
+    <!--partners-->
+   <!--<div class="partners">
+      <img src="img/partners.jpg">
+      </div>-->
+<!-- BANKING DETAILS -->
+<!--<div class="banking-details">
+  <h2>Banking Details</h2>
+  <div class="banks-container">
+    <div class="bank left-bank">
+      <p><strong style="color: black;">First National Bank</strong></p>
+      <p>Thaboera IT Solutions</p>
+      <p>Acc No.: 6294256761</p>
+      <p>Acc Type: Cheque</p>
+      <p>Branch Code: 250117</p>
+      <p>Branch Name: Carlswald</p>
+    </div>
+    <div class="bank right-bank">
+      <p><strong style="color: black;">Standard Bank</strong></p>
+      <p>Thaboera IT Solutions</p>
+      <p>Acc No.: 242341063</p>
+      <p>Acc Type: Cheque</p>
+      <p>Branch Code: 001155</p>
+      <p>Branch Name: Midrand</p>
+    </div>
+  </div>
+</div>-->
+
+<div style="text-align: center; margin-top: 30px;">
+  <a></a><button onclick=" downloadAndRedirect()">Preview Qoute</button></div></a>
+</div>
+
+  </div>
+
+  <script src="js/Qoute-script.js"></script>
+</body>
+</html>

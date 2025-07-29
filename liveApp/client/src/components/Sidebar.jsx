@@ -98,19 +98,22 @@ const Sidebar = () => {
           {/* Sales */}
           <div className="menu-section">
             <div className="menu-section-title">Sales</div>
-            <a href="/invoices" className={`menu-item${isActive('/invoices') ? ' active' : ''}`}>
+            {/* <a href="/client/public/index.html" className={`menu-item${isActive('/client/public/index.html') ? ' active' : ''}`}>
               <i className="fas fa-file-invoice-dollar"></i>
               <span>Invoices</span>
             </a>
-            <a href="/invoices/create" className={`menu-item${isActive('/invoices/create') ? ' active' : ''}`}>
+            */}
+            <a href="/invoice.html" className={`menu-item${isActive('/invoice.html') ? ' active' : ''}`}>
               <i className="fas fa-plus-circle"></i>
               <span>Create Invoice</span>
             </a>
-            <a href="/quotations" className={`menu-item${isActive('/quotations') ? ' active' : ''}`}>
+            {/*
+            <a href="client/public/QouteIndex.html" className={`menu-item${isActive('/client/public/QouteIndex.html') ? ' active' : ''}`}>
               <i className="fas fa-file-signature"></i>
               <span>Quotations</span>
             </a>
-            <a href="/quotations/create" className={`menu-item${isActive('/quotations/create') ? ' active' : ''}`}>
+            */}
+             <a href="/Quote.html" className={`menu-item${isActive('/Quote.html') ? ' active' : ''}`}>
               <i className="fas fa-plus-circle"></i>
               <span>Create Quotation</span>
             </a>
@@ -130,11 +133,12 @@ const Sidebar = () => {
             <a href="/stock-reports" className={`menu-item${isActive('/stock-reports') ? ' active' : ''}`}>
               <i className="fas fa-chart-pie"></i>
               <span>Stock Reports</span>
-            </a> */}
+            </a> *
             <a href="/audit-logs" className={`menu-item${isActive('/audit-logs') ? ' active' : ''}`}>
               <i className="fas fa-clipboard-list"></i>
               <span>System Logs</span>
             </a>
+            */}
           </div>
         </div>
       </nav>

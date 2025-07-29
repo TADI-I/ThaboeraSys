@@ -1,0 +1,210 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Thaboera IT Solutions Invoice</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  
+  <!-- jsPDF and html2canvas for PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body onload="generateInvoiceNumber()">
+   <div class="invoice-app">
+
+  <!-- WRAP ALL INVOICE CONTENT -->
+  <div id="invoiceContent">
+ <div class="framed-section">
+  </div>
+    <!-- COMPANY INFORMATION -->
+    <div class="framed-section company-info">
+  <!-- Logo -->
+  <div class="company-logo">
+    <img src="img/ThaboEra-Logo.png" alt="Company Logo" />
+  </div>
+
+  <!-- Text -->
+  <div class="company-info-text">
+    <h2>Thabo<span style="color: red;">era</span> IT Solutions</h2>
+    <p><strong class="slogan">Bridge Your IT Gap</strong></p>
+    <p>55 Richard's Drive, Halfway House, Midrand | www.thaboera.co.za </p>
+    <p>Email: info@thaboera.co.za | Tel: +27(0) 11 051 3906 | WhatsApp: +27 61 541 4097</p>
+    <p><strong id="vatNumber">VAT No.: 482027225 | Reg: 2006/184754/23</strong></p>
+    
+  </div>
+</div>
+
+
+    <p><strong id="invoiceNumber" style="font-weight: 900;">Qoute No: </strong></p>
+    <!-- CLIENT INFO -->
+    <div id="clientInfoDisplay" class="client-box"></div>
+
+    <!-- INVOICE DETAILS -->
+    <div id="invoiceDetailsDisplay" class="invoice-details-box"></div>
+
+    <!-- INVOICE TABLE -->
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Discount</th>
+          <th>Taxable</th>
+          <th>Unit Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceBody"></tbody>
+    </table>
+
+    <!-- TOTALS AND PARTNERS SECTION -->
+<div class="totals-partners-container">
+  <!-- PARTNERS IMAGE - LEFT -->
+  <div class="partners">
+    <img src="img/partners.jpg" />
+  </div>
+
+  <!-- TOTALS - RIGHT -->
+  <div class="totals">
+    <p>Subtotal: R <span id="subtotal">0.00</span></p>
+    <p>VAT (15%): R <span id="vat">0.00</span></p>
+    <h3>Total: R <span id="total">0.00</span></h3>
+  </div>
+</div>
+
+
+   
+
+    <!-- BANKING DETAILS -->
+    <div class="banking-details">
+      <div class="banks-container">
+        <div class="bank left-bank">
+          <p><strong style="color: black;">First National Bank</strong></p>
+          <p>Thaboera IT Solutions</p>
+          <p>Acc No.: 6294256761</p>
+          <p>Acc Type: Cheque</p>
+          <p>Branch Code: 250117</p>
+          <p>Branch Name: Carlswald</p>
+        </div>
+        <div class="bank right-bank">
+          <p><strong style="color: black;">Standard Bank</strong></p>
+          <p>Thaboera IT Solutions</p>
+          <p>Acc No.: 242341063</p>
+          <p>Acc Type: Cheque</p>
+          <p>Branch Code: 001155</p>
+          <p>Branch Name: Midrand</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PDF BUTTON -->
+  <div style="text-align: center; margin-top: 30px;">
+    <button onclick="downloadInvoice()">Download PDF</button>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    let generatedInvoiceNumber = "";
+
+    // Generate a random invoice number like INV-202507090123
+    function generateInvoiceNumber() {
+      const now = new Date();
+      const datePart = now.getFullYear().toString() + 
+                       String(now.getMonth() + 1).padStart(2, '0') + 
+                       String(now.getDate()).padStart(2, '0');
+      const randomPart = Math.floor(Math.random() * 9000 + 1000);
+      generatedInvoiceNumber = `INV-${datePart}${randomPart}`;
+      document.getElementById("invoiceNumber").innerHTML = `Qoute No: ${generatedInvoiceNumber}`;
+    }
+
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Optional: Your custom script -->
+  <script src="js/Qoute-script.js"></script>
+
+<script>
+  function renderInvoiceFromStorage() {
+    const clientInfo = JSON.parse(localStorage.getItem("clientInfo"));
+    const invoiceDetails = JSON.parse(localStorage.getItem("invoiceDetails"));
+    const invoiceItems = JSON.parse(localStorage.getItem("invoiceItems"));
+    const totals = JSON.parse(localStorage.getItem("totals"));
+    const invoiceNumber = localStorage.getItem("invoiceNumber");
+
+    if (clientInfo) {
+      document.getElementById("clientInfoDisplay").innerHTML = `
+    
+        <div style="display: flex; justify-content: space-between;">
+          <div>
+            <p><strong>Client:</strong> ${clientInfo.clientName}</p>
+            <p><strong>Contact Person:</strong> ${clientInfo.contactPerson}</p>
+            <p><strong>Contact:</strong> ${clientInfo.contactNumber}</p>
+           
+          </div>
+          <div>  
+            <p><strong>Email:</strong> ${clientInfo.email}</p> 
+            <p><strong>Address:</strong> ${clientInfo.address}</p>
+            <p><strong>Reg Number:</strong> ${clientInfo.regNumber}</p>
+          </div>
+        </div>
+      `;
+    }
+if (invoiceDetails) {
+  document.getElementById("invoiceDetailsDisplay").innerHTML = `
+    <table class="boxed-details">
+      <tr>
+        <td><strong>Sales Rep:</strong></td><td>${invoiceDetails.salesRep}</td>
+        <td><strong>FOB:</strong></td><td>${invoiceDetails.fob}</td>
+        <td><strong>Tax ID:</strong></td><td>${invoiceDetails.taxId}</td>
+      </tr>
+      <tr>
+        <td><strong>Ship Via:</strong></td><td>${invoiceDetails.shipVia}</td>
+        <td><strong>Terms:</strong></td><td>${invoiceDetails.terms}</td>
+        <td><strong>Date:</strong></td><td>${invoiceDetails.invoiceDate}</td>
+      </tr>
+    </table>
+  `;
+}
+
+
+    if (invoiceItems) {
+      const tbody = document.getElementById("invoiceBody");
+      tbody.innerHTML = '';
+      invoiceItems.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.item}</td>
+          <td>${item.description}</td>
+          <td>${item.qty}</td>
+          <td>${item.discount}</td>
+          <td>${item.taxable}</td>
+          <td>${item.unitPrice}</td>
+          <td>${item.total}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    if (totals) {
+      document.getElementById("subtotal").textContent = totals.subtotal;
+      document.getElementById("vat").textContent = totals.vat;
+      document.getElementById("total").textContent = totals.total;
+    }
+
+    if (invoiceNumber) {
+      document.getElementById("invoiceNumber").innerHTML = invoiceNumber;
+    }
+  }
+
+  window.onload = renderInvoiceFromStorage;
+</script>
+
+
+</body>
+</html>

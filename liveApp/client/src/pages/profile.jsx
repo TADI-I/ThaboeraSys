@@ -4,9 +4,13 @@ import './profile.css';
 import Sidebar from '../components/Sidebar';
 
 const ProfilePage = () => {
-  const [profile, setProfile] = useState({ 
-    user: { full_name: '', email: '', avatar: '' },
-    staff: { phone: '' }
+  const [user, setUser] = useState({ 
+    id: '',
+    full_name: '', 
+    email: '', 
+    phone_number: '', 
+    picture_url: '',
+    role_id: ''
   });
   const [newPassword, setNewPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -19,16 +23,25 @@ const ProfilePage = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('authToken');
-        if (!token) {
+        const userData = JSON.parse(localStorage.getItem('user'));
+        
+        if (!token || !userData) {
           window.location.href = '/login';
           return;
         }
 
+        // Set user data from localStorage initially
+        setUser(userData);
+
+        // Optional: Fetch fresh data from server
         const response = await axios.get('/api/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        setProfile(response.data);
+        if (response.data) {
+          setUser(response.data);
+          localStorage.setItem('user', JSON.stringify(response.data));
+        }
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load profile');
       } finally {
@@ -62,15 +75,18 @@ const ProfilePage = () => {
         }
       });
 
-      // Update avatar URL in profile
-      await axios.put('/api/profile/avatar', { avatarUrl: response.data.url }, {
+      // Update user with new avatar URL
+      const updatedUser = {
+        ...user,
+        picture_url: response.data.url
+      };
+      
+      await axios.put('/api/profile', updatedUser, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setProfile(prev => ({
-        ...prev,
-        user: { ...prev.user, avatar: response.data.url }
-      }));
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       setSuccess('Profile image updated successfully');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to upload image');
@@ -87,13 +103,19 @@ const ProfilePage = () => {
       setSuccess(null);
 
       const token = localStorage.getItem('authToken');
-      await axios.put('/api/profile', {
-        full_name: profile.user.full_name,
-        email: profile.user.email,
-        phone: profile.staff.phone
+      const response = await axios.put('/api/profile', {
+        id: user.id,
+        full_name: user.full_name,
+        email: user.email,
+        phone_number: user.phone_number
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      // Update local user data with response
+      const updatedUser = response.data.user || user;
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
 
       setSuccess('Profile updated successfully');
     } catch (err) {
@@ -102,6 +124,7 @@ const ProfilePage = () => {
       setIsLoading(false);
     }
   };
+
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -172,7 +195,7 @@ const ProfilePage = () => {
     }));
   };
 
-  return (
+   return (
     <div className="main-view">
       <Sidebar />
       <div className="profile-container">
@@ -183,7 +206,7 @@ const ProfilePage = () => {
           <div className="avatar-container">
             <img
               id="profileImage"
-              src={profile.user.avatar || '/default-avatar.jpg'}
+              src={user.picture_url || '/default-avatar.jpg'}
               alt="Profile"
             />
             <button 
@@ -201,8 +224,8 @@ const ProfilePage = () => {
               disabled={isLoading}
             />
           </div>
-          <h1>{profile.user.full_name || 'User'}</h1>
-          <p>{profile.user.email || 'email@example.com'}</p>
+          <h1>{user.full_name || 'User'}</h1>
+          <p>{user.email || 'email@example.com'}</p>
         </div>
 
         <div className="profile-details">
@@ -213,8 +236,8 @@ const ProfilePage = () => {
               <input
                 type="text"
                 name="full_name"
-                value={profile.user.full_name}
-                onChange={handleInputChange}
+                value={user.full_name}
+                onChange={(e) => setUser({...user, full_name: e.target.value})}
                 required
                 disabled={isLoading}
               />
@@ -224,8 +247,8 @@ const ProfilePage = () => {
               <input
                 type="email"
                 name="email"
-                value={profile.user.email}
-                onChange={handleInputChange}
+                value={user.email}
+                onChange={(e) => setUser({...user, email: e.target.value})}
                 required
                 disabled={isLoading}
               />
@@ -234,9 +257,9 @@ const ProfilePage = () => {
               <label>Phone Number</label>
               <input
                 type="tel"
-                name="phone"
-                value={profile.staff.phone || ''}
-                onChange={handleStaffInputChange}
+                name="phone_number"
+                value={user.phone_number || ''}
+                onChange={(e) => setUser({...user, phone_number: e.target.value})}
                 disabled={isLoading}
               />
             </div>

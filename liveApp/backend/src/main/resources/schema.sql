@@ -1,8 +1,14 @@
 -- Roles Table
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL
 );
+
+-- 2. Insert the three roles (ignore if they already exist)
+INSERT INTO roles (name) VALUES ('admin') ON CONFLICT (name) DO NOTHING;
+INSERT INTO roles (name) VALUES ('sales') ON CONFLICT (name) DO NOTHING;
+INSERT INTO roles (name) VALUES ('user') ON CONFLICT (name) DO NOTHING;
+
 
 -- Users Table
 CREATE TABLE users (
@@ -13,7 +19,8 @@ CREATE TABLE users (
     picture_url TEXT,
     password_hash TEXT NOT NULL,
     role_id INTEGER REFERENCES roles(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Products Table
@@ -23,7 +30,8 @@ CREATE TABLE products (
     description TEXT,
     price NUMERIC(12, 2) NOT NULL,
     stock_quantity INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
 );
 
 -- Suppliers Table
