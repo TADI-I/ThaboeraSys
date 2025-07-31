@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import './Sidebar.css';
 import logo from './ThaboEra-Logo.png';
@@ -19,27 +19,35 @@ const Sidebar = () => {
     }
   };
 
-  // Helper to check if a menu item is active
   const isActive = (href) => currentPath === href;
+
+  useEffect(() => {
+    // Close sidebar on route change (mobile only)
+    setSidebarActive(false);
+  }, [currentPath]);
 
   return (
     <>
       {/* Mobile Menu Toggle */}
-      <button className="mobile-menu-toggle" onClick={toggleSidebar}>
+   
+     <button className="mobile-menu-toggle" onClick={toggleSidebar}>
         <i className="fas fa-bars"></i>
       </button>
 
-      
-        <nav className={`sidebar${sidebarActive ? ' active' : ''}`}>
-          <div className="sidebar-header">
-            <button className="sidebar-close" onClick={toggleSidebar}>
-          <i className="fas fa-times"></i>
-            </button>
-            <div className="company-logo">
-          <img src={logo} alt="Company Logo" style={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'contain' }} />
-            </div>
-            <h2>ThaboEra IT Solutions</h2>
+    <nav className={`sidebar${sidebarActive ? ' active' : ''}`}>
+        <div className="sidebar-header">
+          <button className="sidebar-close" onClick={toggleSidebar}>
+            <i className="fas fa-times"></i>
+          </button>
+          <div className="company-logo">
+            <img
+              src={logo}
+              alt="Company Logo"
+              style={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'contain' }}
+            />
           </div>
+          <h2>ThaboEra IT Solutions</h2>
+        </div>
 
           <div className="sidebar-menu">
             {/* Dashboard */}
@@ -98,21 +106,21 @@ const Sidebar = () => {
           {/* Sales */}
           <div className="menu-section">
             <div className="menu-section-title">Sales</div>
-            {/* <a href="/client/public/index.html" className={`menu-item${isActive('/client/public/index.html') ? ' active' : ''}`}>
+             <a href="/invoices" className={`menu-item${isActive('/incoices') ? ' active' : ''}`}>
               <i className="fas fa-file-invoice-dollar"></i>
               <span>Invoices</span>
             </a>
-            */}
+            
             <a href="/invoice.html" className={`menu-item${isActive('/invoice.html') ? ' active' : ''}`}>
               <i className="fas fa-plus-circle"></i>
               <span>Create Invoice</span>
             </a>
-            {/*
-            <a href="client/public/QouteIndex.html" className={`menu-item${isActive('/client/public/QouteIndex.html') ? ' active' : ''}`}>
+            
+            <a href="/quotations" className={`menu-item${isActive('/quotations') ? ' active' : ''}`}>
               <i className="fas fa-file-signature"></i>
               <span>Quotations</span>
             </a>
-            */}
+            
              <a href="/Quote.html" className={`menu-item${isActive('/Quote.html') ? ' active' : ''}`}>
               <i className="fas fa-plus-circle"></i>
               <span>Create Quotation</span>
@@ -144,10 +152,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Overlay for mobile menu */}
-      <div
-        className={`sidebar-overlay${sidebarActive ? ' active' : ''}`}
-        onClick={toggleSidebar}
-      ></div>
+      <div className={`sidebar-overlay${sidebarActive ? ' active' : ''}`} onClick={toggleSidebar}></div>
     </>
   );
 };

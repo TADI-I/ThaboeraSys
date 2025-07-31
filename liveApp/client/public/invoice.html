@@ -4,88 +4,218 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Thaboera IT Solutions Invoice</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
-<body>
-  <div class="invoice-app">
-
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
     
+    .invoice-app {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    h2 {
+      color: #2c3e50;
+      border-bottom: 2px solid #e74c3c;
+      padding-bottom: 5px;
+      margin-top: 0;
+    }
+    
+    input, select {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 180px;
+    }
+    
+    button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      background-color: #c0392b;
+    }
+    
+    .framed-section {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .company-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .company-logo img {
+      max-height: 100px;
+      margin-right: 20px;
+    }
+    
+    .company-info-text h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+    
+    .slogan {
+      color: #e74c3c;
+      font-style: italic;
+    }
+    
+    .client-box, .invoice-details-box {
+      padding: 15px;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #2c3e50;
+      color: white;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    
+    .totals {
+      text-align: right;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    
+    .totals h3 {
+      color: #e74c3c;
+    }
+    
+    .confirmation {
+      margin-top: 10px;
+      color: green;
+      font-weight: bold;
+    }
+    
+    .boxed-details {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .boxed-details td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+    
+    .actions button {
+      padding: 5px 10px;
+      margin: 2px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body onload="generateInvoiceNumber()">
+  <div class="invoice-app">
+    <!-- COMPANY INFORMATION -->
+    <div class="company-info">
+      <div class="company-logo">
+        <img src="img/ThaboEra-Logo.png" alt="Company Logo" />
+      </div>
+      <div class="company-info-text">
+        <h2>Thabo<span style="color: red;">era</span> IT Solutions</h2>
+        <p><strong class="slogan">Bridge Your IT Gap</strong></p>
+        <p>55 Richard's Drive, Halfway House, Midrand | www.thaboera.co.za</p>
+        <p>Email: info@thaboera.co.za | Tel: +27(0) 11 051 3906 | WhatsApp: +27 61 541 4097</p>
+        <p><strong id="vatNumber">VAT No.: 482027225 | Reg: 2006/184754/23</strong></p>
+        <p><strong id="invoiceNumber">Invoice No: </strong></p>
+      </div>
+    </div>
 
     <!-- CLIENT INFORMATION -->
     <section>
       <h2>Client Information</h2>
-      <input type="text" id="clientName" placeholder="Client Name" />
-      <input type="text" id="contactPerson" placeholder="Contact Person" />
-      <input type="text" id="contactNumber" placeholder="Contact Number" />
-      <input type="email" id="email" placeholder="Email Address" />
-      <input type="text" id="address" placeholder="Address" />
+      <input type="text" id="clientName" placeholder="Client Name" required />
+      <input type="text" id="contactPerson" placeholder="Contact Person" required />
+      <input type="text" id="contactNumber" placeholder="Contact Number" required />
+      <input type="email" id="email" placeholder="Email Address" required />
+      <input type="text" id="address" placeholder="Address" required />
       <input type="text" id="regNumber" placeholder="Registration Number" />
-      <button onclick="showClientInfo()">Save Client Info</button>
-      <div id="confirmation" style="margin-top: 10px; color: green; font-weight: bold;"></div>
-
+      <button onclick="saveClientInfo()">Save Client Info</button>
+      <div id="confirmation" class="confirmation"></div>
     </section>
 
-    <!-- INVOICE DETAILS SECTION -->
-<section>
-  <h2>Invoice Details</h2>
-  <input type="text" id="salesRep" placeholder="Sales Rep" />
-  <input type="text" id="fob" placeholder="FOB" />
-  <input type="text" id="shipVia" placeholder="Ship Via" />
-  <input type="text" id="terms" placeholder="Terms" />
-  <input type="text" id="taxId" placeholder="Tax ID" />
-  <input type="date" id="invoiceDate" />
-  <button onclick="showInvoiceDetails()">Save Invoice Details</button>
-  <div id="conf" style="margin-top: 10px; color: green; font-weight: bold;"></div>
+    <!-- INVOICE DETAILS -->
+    <section>
+      <h2>Invoice Details</h2>
+      <input type="text" id="salesRep" placeholder="Sales Rep" required />
+      <input type="text" id="fob" placeholder="FOB" />
+      <input type="text" id="shipVia" placeholder="Ship Via" />
+      <input type="text" id="terms" placeholder="Terms" />
+      <input type="text" id="taxId" placeholder="Tax ID" />
+      <input type="date" id="invoiceDate" required />
+      <button onclick="saveInvoiceDetails()">Save Invoice Details</button>
+      <div id="conf" class="confirmation"></div>
+    </section>
 
-</section>
-
-          <!-- ITEM INFORMATION -->
-      <div class="framed-section">
-        <section>
-          <!-- <h2>Invoice Item</h2>-->
-          <input type="text" id="item" placeholder="Item Name" />
-          <input type="text" id="description" placeholder="Description" />
-          <input type="number" id="qty" placeholder="Quantity" />
-          <input type="number" id="unitPrice" placeholder="Unit Price" />
-          <input type="number" id="discount" placeholder="Discount (%)" />
-          <select id="taxable">
-            <option value="yes">Taxable</option>
-            <option value="no">Non-taxable</option>
-          </select>
-          <button onclick="addItem()">Add Item</button>
-        </section>
-      </div>
-  <!-- WRAP ALL INVOICE CONTENT -->
-
-    <!-- COMPANY INFORMATION -->
-    <div class="framed-section company-info">
-  <!-- Logo -->
-  <div class="company-logo">
-    <img src="img/ThaboEra-Logo.png" alt="Company Logo" />
-  </div>
-
-  <!-- Text -->
-  <div class="company-info-text">
-    <h2>Thabo<span style="color: red;">era</span> IT Solutions</h2>
-    <p><strong class="slogan">Bridge Your IT Gap</strong></p>
-    <p>55 Richard's Drive, Halfway House, Midrand | www.thaboera.co.za </p>
-    <p>Email: info@thaboera.co.za | Tel: +27(0) 11 051 3906 | wh: +27 61 541 4097</p>
-    <p><strong id="vatNumber">VAT No.: 482027225 | Reg: 2006/184754/23</strong></p>
-    <p><strong id="invoiceNumber">Invoice No: </strong></p>
-  </div>
-</div>
-
+    <!-- ITEM INFORMATION -->
+    <div class="framed-section">
+      <section>
+        <h3>Add Items</h3>
+        <input type="text" id="item" placeholder="Item Name" required />
+        <input type="text" id="description" placeholder="Description" />
+        <input type="number" id="qty" placeholder="Quantity" min="1" required />
+        <input type="number" id="unitPrice" placeholder="Unit Price" min="0" step="0.01" required />
+        <input type="number" id="discount" placeholder="Discount (%)" min="0" max="100" value="0" />
+        <select id="taxable" required>
+          <option value="yes">Taxable</option>
+          <option value="no">Non-taxable</option>
+        </select>
+        <button onclick="addItem()">Add Item</button>
+      </section>
+    </div>
 
     <!-- DISPLAY CLIENT INFO -->
     <div id="clientInfoDisplay" class="client-box"></div>
 
+    <!-- DISPLAY INVOICE DETAILS -->
     <div id="invoiceDetailsDisplay" class="invoice-details-box"></div>
 
-  
-
-    <!-- DISPLAY INVOICE ITEMS -->
-     <!-- INVOICE TABLE -->
+    <!-- INVOICE ITEMS TABLE -->
     <table>
       <thead>
         <tr>
@@ -102,8 +232,6 @@
       <tbody id="invoiceBody"></tbody>
     </table>
 
-   
-
     <!-- TOTALS -->
     <div class="totals">
       <p>Subtotal: R <span id="subtotal">0.00</span></p>
@@ -111,44 +239,308 @@
       <h3>Total: R <span id="total">0.00</span></h3>
     </div>
 
-    <!--partners-->
-   <!--<div class="partners">
-      <img src="img/partners.jpg">
-      </div>-->
-<!-- BANKING DETAILS -->
-<!--<div class="banking-details">
-  <h2>Banking Details</h2>
-  <div class="banks-container">
-    <div class="bank left-bank">
-      <p><strong style="color: black;">First National Bank</strong></p>
-      <p>Thaboera IT Solutions</p>
-      <p>Acc No.: 6294256761</p>
-      <p>Acc Type: Cheque</p>
-      <p>Branch Code: 250117</p>
-      <p>Branch Name: Carlswald</p>
-    </div>
-    <div class="bank right-bank">
-      <p><strong style="color: black;">Standard Bank</strong></p>
-      <p>Thaboera IT Solutions</p>
-      <p>Acc No.: 242341063</p>
-      <p>Acc Type: Cheque</p>
-      <p>Branch Code: 001155</p>
-      <p>Branch Name: Midrand</p>
+    <!-- ACTION BUTTON -->
+    <div style="text-align: center; margin-top: 30px;">
+      <button onclick="downloadAndRedirect()">Preview & Download Invoice</button>
     </div>
   </div>
-</div>-->
 
-<div style="text-align: center; margin-top: 30px;">
-  <a></a><button onclick=" downloadAndRedirect()">Preview Invoice</button></div></a>
-</div>
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // Global variables
+    let subtotal = 0;
+    let vat = 0;
+    let total = 0;
+    let clientId = null;
+    const { jsPDF } = window.jspdf;
 
+    // Generate invoice number on page load
+    function generateInvoiceNumber() {
+      const date = new Date();
+      const year = date.getFullYear().toString().slice(-2);
+      const month = ("0" + (date.getMonth() + 1)).slice(-2);
+      const day = ("0" + date.getDate()).slice(-2);
+      const randomPart = Math.floor(Math.random() * 9000) + 1000;
+      
+      const invoiceNum = `TIS-INV-${year}${month}${day}-${randomPart}`;
+      document.getElementById("invoiceNumber").innerText = `Invoice No: ${invoiceNum}`;
+      return invoiceNum;
+    }
 
-  
-  </div>
+    // Save client information
+    async function saveClientInfo() {
+      const clientData = {
+        name: document.getElementById("clientName").value,
+        contactPerson: document.getElementById("contactPerson").value,
+        contactNumber: document.getElementById("contactNumber").value,
+        email: document.getElementById("email").value,
+        address: document.getElementById("address").value,
+        regNumber: document.getElementById("regNumber").value
+      };
 
+      // Basic validation
+      if (!clientData.name || !clientData.contactPerson || !clientData.contactNumber || 
+          !clientData.email || !clientData.address) {
+        document.getElementById("confirmation").textContent = "❌ Please fill all required fields";
+        return;
+      }
 
+      try {
+        // In a real app, you would save to database here
+        // For now, we'll just display the info
+        document.getElementById("clientInfoDisplay").innerHTML = `
+          <h3>Client Details</h3>
+          <div style="display: flex; justify-content: space-between;">
+            <div>
+              <p><strong>Client:</strong> ${clientData.name}</p>
+              <p><strong>Contact Person:</strong> ${clientData.contactPerson}</p>
+              <p><strong>Contact:</strong> ${clientData.contactNumber}</p>
+            </div>
+            <div>
+              <p><strong>Email:</strong> ${clientData.email}</p>
+              <p><strong>Address:</strong> ${clientData.address}</p>
+              ${clientData.regNumber ? `<p><strong>Reg Number:</strong> ${clientData.regNumber}</p>` : ''}
+            </div>
+          </div>
+        `;
+        
+        document.getElementById("confirmation").textContent = "✅ Client info saved successfully!";
+      } catch (error) {
+        console.error('Error saving client:', error);
+        document.getElementById("confirmation").textContent = "❌ Error saving client info";
+      }
+    }
 
+    // Save invoice details
+    function saveInvoiceDetails() {
+      const salesRep = document.getElementById("salesRep").value;
+      const invoiceDate = document.getElementById("invoiceDate").value;
 
-  <script src="js/script.js"></script>
+      if (!salesRep || !invoiceDate) {
+        document.getElementById("conf").textContent = "❌ Please fill all required fields";
+        return;
+      }
+
+      document.getElementById("invoiceDetailsDisplay").innerHTML = `
+        <h3>Invoice Details</h3>
+        <table class="boxed-details">
+          <tr>
+            <td><strong>Sales Rep:</strong></td><td>${salesRep}</td>
+            <td><strong>Date:</strong></td><td>${invoiceDate}</td>
+          </tr>
+          <tr>
+            <td><strong>Terms:</strong></td><td>${document.getElementById("terms").value || 'N/A'}</td>
+            <td><strong>Tax ID:</strong></td><td>${document.getElementById("taxId").value || 'N/A'}</td>
+          </tr>
+        </table>
+      `;
+      
+      document.getElementById("conf").textContent = "✅ Invoice details saved successfully!";
+    }
+
+    // Add item to invoice
+    function addItem() {
+      const item = document.getElementById("item").value;
+      const qty = parseFloat(document.getElementById("qty").value);
+      const unitPrice = parseFloat(document.getElementById("unitPrice").value);
+      
+      if (!item || isNaN(qty) || isNaN(unitPrice)) {
+        alert("Please enter all required item fields");
+        return;
+      }
+
+      const discount = parseFloat(document.getElementById("discount").value) || 0;
+      const taxable = document.getElementById("taxable").value === "yes";
+      
+      const discountedPrice = unitPrice - (unitPrice * discount / 100);
+      const itemTotal = qty * discountedPrice;
+      const vatAmount = taxable ? itemTotal * 0.15 : 0;
+
+      subtotal += itemTotal;
+      vat += vatAmount;
+      total = subtotal + vat;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item}</td>
+        <td>${document.getElementById("description").value || ''}</td>
+        <td>${qty}</td>
+        <td>${discount}%</td>
+        <td>${taxable ? 'Yes' : 'No'}</td>
+        <td>R ${unitPrice.toFixed(2)}</td>
+        <td>R ${itemTotal.toFixed(2)}</td>
+        <td class="actions">
+          <button onclick="editRow(this)">Edit</button>
+          <button onclick="deleteRow(this)">Delete</button>
+        </td>
+      `;
+
+      document.getElementById("invoiceBody").appendChild(row);
+      updateTotals();
+
+      // Reset form fields
+      document.getElementById("item").value = '';
+      document.getElementById("description").value = '';
+      document.getElementById("qty").value = '';
+      document.getElementById("unitPrice").value = '';
+      document.getElementById("discount").value = '0';
+      document.getElementById("taxable").value = 'yes';
+    }
+
+    // Update totals display
+    function updateTotals() {
+      document.getElementById("subtotal").textContent = subtotal.toFixed(2);
+      document.getElementById("vat").textContent = vat.toFixed(2);
+      document.getElementById("total").textContent = total.toFixed(2);
+    }
+
+    // Delete row from invoice
+    function deleteRow(button) {
+      const row = button.closest("tr");
+      const cells = row.querySelectorAll("td");
+      const itemTotal = parseFloat(cells[6].textContent.replace('R ', ''));
+      const taxable = cells[4].textContent === 'Yes';
+      const vatAmount = taxable ? itemTotal * 0.15 : 0;
+
+      subtotal -= itemTotal;
+      vat -= vatAmount;
+      total = subtotal + vat;
+
+      row.remove();
+      updateTotals();
+    }
+
+    // Edit row in invoice
+    function editRow(button) {
+      const row = button.closest("tr");
+      const cells = row.querySelectorAll("td");
+
+      // Fill form with item data
+      document.getElementById("item").value = cells[0].textContent;
+      document.getElementById("description").value = cells[1].textContent;
+      document.getElementById("qty").value = cells[2].textContent;
+      document.getElementById("discount").value = cells[3].textContent.replace('%', '');
+      document.getElementById("taxable").value = cells[4].textContent === 'Yes' ? 'yes' : 'no';
+      document.getElementById("unitPrice").value = cells[5].textContent.replace('R ', '');
+
+      // Remove the values from totals
+      const itemTotal = parseFloat(cells[6].textContent.replace('R ', ''));
+      const taxable = cells[4].textContent === 'Yes';
+      const vatAmount = taxable ? itemTotal * 0.15 : 0;
+
+      subtotal -= itemTotal;
+      vat -= vatAmount;
+      total = subtotal + vat;
+      updateTotals();
+
+      // Remove the row
+      row.remove();
+    }
+
+    // Download and redirect
+    async function downloadAndRedirect() {
+      // Validate required fields
+      if (!validateForm()) return;
+
+      // Save data to localStorage for preview
+      const invoiceData = {
+        clientInfo: {
+          clientName: document.getElementById("clientName").value,
+          contactPerson: document.getElementById("contactPerson").value,
+          contactNumber: document.getElementById("contactNumber").value,
+          email: document.getElementById("email").value,
+          address: document.getElementById("address").value,
+          regNumber: document.getElementById("regNumber").value
+        },
+        invoiceDetails: {
+          salesRep: document.getElementById("salesRep").value,
+          fob: document.getElementById("fob").value,
+          shipVia: document.getElementById("shipVia").value,
+          terms: document.getElementById("terms").value,
+          taxId: document.getElementById("taxId").value,
+          invoiceDate: document.getElementById("invoiceDate").value,
+          invoiceNumber: document.getElementById("invoiceNumber").textContent.replace('Invoice No: ', '')
+        },
+        items: Array.from(document.querySelectorAll("#invoiceBody tr")).map(row => {
+          const cells = row.querySelectorAll("td");
+          return {
+            item: cells[0].textContent,
+            description: cells[1].textContent,
+            qty: cells[2].textContent,
+            discount: cells[3].textContent.replace('%', ''),
+            taxable: cells[4].textContent,
+            unitPrice: cells[5].textContent.replace('R ', ''),
+            total: cells[6].textContent.replace('R ', '')
+          };
+        }),
+        totals: {
+          subtotal: document.getElementById("subtotal").textContent,
+          vat: document.getElementById("vat").textContent,
+          total: document.getElementById("total").textContent
+        }
+      };
+
+      localStorage.setItem("currentInvoice", JSON.stringify(invoiceData));
+      
+      // Generate PDF
+      await generatePDF();
+      
+      // Redirect to preview page
+      window.location.href = "previewInv.html";
+    }
+
+    // Generate PDF
+    async function generatePDF() {
+      try {
+        const element = document.getElementById("invoiceContent");
+        const canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`${document.getElementById("invoiceNumber").textContent}.pdf`);
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Error generating PDF');
+      }
+    }
+
+    // Validate form
+    function validateForm() {
+      // Check client info
+      if (!document.getElementById("clientName").value ||
+          !document.getElementById("contactPerson").value ||
+          !document.getElementById("contactNumber").value ||
+          !document.getElementById("email").value ||
+          !document.getElementById("address").value) {
+        alert("Please complete all required client information");
+        return false;
+      }
+
+      // Check invoice details
+      if (!document.getElementById("salesRep").value || 
+          !document.getElementById("invoiceDate").value) {
+        alert("Please complete all required invoice details");
+        return false;
+      }
+
+      // Check items
+      if (document.querySelectorAll("#invoiceBody tr").length === 0) {
+        alert("Please add at least one item to the invoice");
+        return false;
+      }
+
+      return true;
+    }
+  </script>
 </body>
 </html>

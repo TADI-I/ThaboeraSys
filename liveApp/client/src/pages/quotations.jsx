@@ -1,189 +1,335 @@
-import React, { useEffect, useState } from 'react';
-import './quotations.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileInvoiceDollar, faPlus, faFilter, faEye, faExchangeAlt, faPaperPlane, faHome } from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { format, subDays } from 'date-fns';
 import Sidebar from '../components/Sidebar';
+import './quotations.css';
 
 const Quotations = () => {
   const [quotations, setQuotations] = useState([]);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [clientFilter, setClientFilter] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all'); // 'all', 'pending', 'accepted', 'rejected'
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      window.location.href = 'login.html';
-    } else {
-      loadQuotations();
-    }
+    const fetchQuotations = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('/api/quotations');
+        const now = new Date();
+        const fourteenDaysAgo = subDays(now, 14);
+        
+        // Filter out quotations older than 14 days
+        const recentQuotations = response.data.filter(q => {
+          const quoteDate = new Date(q.dateIssued);
+          return quoteDate >= fourteenDaysAgo;
+        });
+
+        // Optionally delete old quotations
+        const oldQuotations = response.data.filter(q => {
+          const quoteDate = new Date(q.dateIssued);
+          return quoteDate < fourteenDaysAgo;
+        });
+
+        if (oldQuotations.length > 0) {
+          await Promise.all(oldQuotations.map(q => 
+            axios.delete(`/api/quotations/${q.id}`)
+          ));
+        }
+
+        setQuotations(recentQuotations);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuotations();
+    
+    // Check for expired quotations every hour
+    const interval = setInterval(fetchQuotations, 3600000);
+    return () => clearInterval(interval);
   }, []);
 
-  const loadQuotations = () => {
-    const filters = {
-      status: statusFilter,
-      client: clientFilter
-    };
-    simulateAPICall('/api/quotations', filters).then(res => {
-      if (res.success) setQuotations(res.data);
-    });
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric', month: 'short', day: 'numeric'
-    });
-  };
-
-  const viewQuotation = (id) => {
-    window.location.href = `quotation-detail.html?id=${id}`;
-  };
-
-  const convertToInvoice = (id) => {
-    if (window.confirm('Convert this quotation to an invoice?')) {
-      simulateAPICall(`/api/quotations/${id}/convert`, {}, 'POST').then(res => {
-        if (res.success) {
-          alert('Quotation converted to invoice!');
-          window.location.href = `create-invoice.html?id=${res.data.invoiceId}`;
-        }
-      });
+  const updateQuotationStatus = async (id, status) => {
+    try {
+      await axios.put(`/api/quotations/${id}/status`, { status });
+      setQuotations(quotations.map(q => 
+        q.id === id ? { ...q, status } : q
+      ));
+    } catch (err) {
+      setError(`Failed to update status: ${err.message}`);
     }
   };
 
-  const sendQuotation = (id) => {
-    if (window.confirm('Send this quotation to the client?')) {
-      simulateAPICall(`/api/quotations/${id}/send`, {}, 'POST').then(res => {
-        if (res.success) {
-          alert('Quotation sent to client!');
-          loadQuotations();
-        }
-      });
+  const filteredQuotations = quotations.filter(q => {
+    // Apply status filter
+    if (filter !== 'all' && q.status !== filter) return false;
+    
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      return (
+        q.quotationNumber.toLowerCase().includes(term) ||
+        (q.Client?.name.toLowerCase().includes(term)) ||
+        (q.Client?.contactPerson.toLowerCase().includes(term))
+      );
     }
-  };
+    
+    return true;
+  });
+
+  if (loading) return <div className="loading">Loading quotations...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <>
-      <div className="main-view">
-        <Sidebar />
-        <div className="documents-container">
-          <h1><FontAwesomeIcon icon={faFileInvoiceDollar} /> Quotations</h1>
-          <button className="btn-secondary" onClick={() => window.location.href = '/dashboard'}>
-            <FontAwesomeIcon icon={faHome} /> Dashboard
+    <div className="main-view">
+      <Sidebar />
+      <div className="documents-container">
+      <h1>Quotation Management</h1>
+      
+      <div className="controls">
+        <div className="filters">
+          <button 
+            className={filter === 'all' ? 'active' : ''}
+            onClick={() => setFilter('all')}
+          >
+            All
           </button>
-          <div className="document-actions">
-            <button className="btn-primary" onClick={() => window.location.href = '/quotations/create'}>
-              <FontAwesomeIcon icon={faPlus} /> Create Quotation
-            </button>
-            <div className="document-filters">
-              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-                <option value="">All Statuses</option>
-                <option value="PENDING">Pending</option>
-                <option value="ACCEPTED">Accepted</option>
-                <option value="REJECTED">Rejected</option>
-                <option value="EXPIRED">Expired</option>
-              </select>
-              <input type="text" placeholder="Filter by client..." value={clientFilter} onChange={e => setClientFilter(e.target.value)} />
-              <button className="btn-secondary" onClick={loadQuotations}>
-                <FontAwesomeIcon icon={faFilter} /> Apply
-              </button>
-            </div>
-          </div>
+          <button 
+            className={filter === 'pending' ? 'active' : ''}
+            onClick={() => setFilter('pending')}
+          >
+            Pending
+          </button>
+          <button 
+            className={filter === 'accepted' ? 'active' : ''}
+            onClick={() => setFilter('accepted')}
+          >
+            Accepted
+          </button>
+          <button 
+            className={filter === 'rejected' ? 'active' : ''}
+            onClick={() => setFilter('rejected')}
+          >
+            Rejected
+          </button>
+        </div>
+        
+        <div className="search">
+          <input
+            type="text"
+            placeholder="Search quotations..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
-          <table id="quotationsTable">
+      <div className="quotations-list">
+        {filteredQuotations.length === 0 ? (
+          <div className="no-results">No quotations found</div>
+        ) : (
+          <table>
             <thead>
               <tr>
-                <th>Quote #</th>
+                <th>Quotation #</th>
                 <th>Client</th>
                 <th>Date</th>
-                <th>Amount</th>
+                <th>Total</th>
                 <th>Status</th>
-                <th>Expiry Date</th>
                 <th>Actions</th>
+                <th>Expires In</th>
               </tr>
             </thead>
             <tbody>
-              {quotations.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="empty-state">
-                    <FontAwesomeIcon icon={faFileInvoiceDollar} />
-                    <p>No quotations found</p>
-                  </td>
-                </tr>
-              ) : (
-                quotations.map(quote => (
-                  <tr key={quote.id}>
-                    <td>{quote.quoteNumber}</td>
-                    <td>{quote.client.name}</td>
-                    <td>{formatDate(quote.date)}</td>
-                    <td>R{quote.total.toFixed(2)}</td>
-                    <td><span className={`status-${quote.status.toLowerCase()}`}>{quote.status}</span></td>
-                    <td>{formatDate(quote.expiryDate)}</td>
+              {filteredQuotations.map(quotation => {
+                const quoteDate = new Date(quotation.dateIssued);
+                const expiryDate = new Date(quoteDate);
+                expiryDate.setDate(expiryDate.getDate() + 14);
+                const daysRemaining = Math.ceil((expiryDate - new Date()) / (1000 * 60 * 60 * 24));
+                
+                return (
+                  <tr key={quotation.id} className={`status-${quotation.status}`}>
+                    <td>{quotation.quotationNumber}</td>
+                    <td>
+                      {quotation.Client?.name || 'N/A'}<br />
+                      <small>{quotation.Client?.contactPerson || ''}</small>
+                    </td>
+                    <td>{format(quoteDate, 'PP')}</td>
+                    <td>R {parseFloat(quotation.total).toFixed(2)}</td>
+                    <td>
+                      <span className={`status-badge ${quotation.status}`}>
+                        {quotation.status}
+                      </span>
+                    </td>
                     <td className="actions">
-                      <button className="btn-view" onClick={() => viewQuotation(quote.id)}>
-                        <FontAwesomeIcon icon={faEye} /> View
-                      </button>
-                      <button className="btn-convert" onClick={() => convertToInvoice(quote.id)}>
-                        <FontAwesomeIcon icon={faExchangeAlt} /> Convert
-                      </button>
-                      {quote.status === 'PENDING' && (
-                        <button className="btn-send" onClick={() => sendQuotation(quote.id)}>
-                          <FontAwesomeIcon icon={faPaperPlane} /> Send
-                        </button>
+                      {quotation.status === 'pending' && (
+                        <>
+                          <button 
+                            className="accept"
+                            onClick={() => updateQuotationStatus(quotation.id, 'accepted')}
+                          >
+                            Accept
+                          </button>
+                          <button 
+                            className="reject"
+                            onClick={() => updateQuotationStatus(quotation.id, 'rejected')}
+                          >
+                            Reject
+                          </button>
+                        </>
                       )}
+                      <button 
+                        className="view"
+                        onClick={() => window.open('TIS-Qoute.html?id=${result.quotationId || quotationId}')}
+                      >
+                        View
+                      </button>
+                    </td>
+                    <td className={daysRemaining <= 3 ? 'expiring' : ''}>
+                      {daysRemaining > 0 ? `${daysRemaining} days` : 'Expired'}
                     </td>
                   </tr>
-                ))
-              )}
+                );
+              })}
             </tbody>
           </table>
-        </div>
+        )}
       </div>
-    </>
+      </div>
+
+      <style jsx>{`
+        
+        
+        .controls {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 20px;
+          flex-wrap: wrap;
+          gap: 15px;
+        }
+        
+        .filters {
+          display: flex;
+          gap: 10px;
+        }
+        
+        .filters button {
+          padding: 8px 15px;
+          border: 1px solid #ddd;
+          background: white;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+        
+        .filters button.active {
+          background: #e74c3c;
+          color: white;
+          border-color: #e74c3c;
+        }
+        
+        .search input {
+          padding: 8px 15px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          min-width: 250px;
+        }
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+        
+        th, td {
+          padding: 12px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+          background-color: #2c3e50;
+          color: white;
+        }
+        
+        tr:hover {
+          background-color: #f5f5f5;
+        }
+        
+        .status-badge {
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 0.8em;
+          text-transform: capitalize;
+        }
+        
+        .status-badge.pending {
+          background-color: #f39c12;
+          color: white;
+        }
+        
+        .status-badge.accepted {
+          background-color: #2ecc71;
+          color: white;
+        }
+        
+        .status-badge.rejected {
+          background-color: #e74c3c;
+          color: white;
+        }
+        
+        .actions {
+          display: flex;
+          gap: 8px;
+        }
+        
+        .actions button {
+          padding: 6px 12px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.9em;
+        }
+        
+        .actions button.view {
+          background-color: #3498db;
+          color: white;
+        }
+        
+        .actions button.accept {
+          background-color: #2ecc71;
+          color: white;
+        }
+        
+        .actions button.reject {
+          background-color: #e74c3c;
+          color: white;
+        }
+        
+        .expiring {
+          color: #e74c3c;
+          font-weight: bold;
+        }
+        
+        .no-results {
+          padding: 20px;
+          text-align: center;
+          color: #7f8c8d;
+        }
+        
+        .loading, .error {
+          padding: 20px;
+          text-align: center;
+        }
+        
+        .error {
+          color: #e74c3c;
+        }
+      `}</style>
+    </div>
   );
 };
 
 export default Quotations;
-
-function simulateAPICall(url, data = {}, method = 'GET') {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      if (method === 'GET' && url === '/api/quotations') {
-        const mockQuotations = [];
-        const clients = [
-          { id: 1, name: 'Acme Corporation' },
-          { id: 2, name: 'Globex Inc' },
-          { id: 3, name: 'Soylent Corp' }
-        ];
-        const statuses = ['PENDING', 'ACCEPTED', 'REJECTED', 'EXPIRED'];
-
-        for (let i = 1; i <= 15; i++) {
-          const date = new Date();
-          date.setDate(date.getDate() - Math.floor(Math.random() * 30));
-          const expiryDate = new Date(date);
-          expiryDate.setDate(expiryDate.getDate() + 30);
-          const status = statuses[Math.floor(Math.random() * statuses.length)];
-
-          if (data.status && status !== data.status) continue;
-          if (data.client && !clients.some(c => c.name.toLowerCase().includes(data.client.toLowerCase()))) continue;
-
-          mockQuotations.push({
-            id: i,
-            quoteNumber: `QT-${1000 + i}`,
-            client: clients[Math.floor(Math.random() * clients.length)],
-            date: date.toISOString(),
-            expiryDate: expiryDate.toISOString(),
-            total: Math.random() * 1000 + 100,
-            status: status
-          });
-        }
-
-        resolve({ success: true, data: mockQuotations });
-      } else if (url.includes('/convert') && method === 'POST') {
-        resolve({ success: true, data: { invoiceId: Math.floor(Math.random() * 1000) + 100 } });
-      } else if (url.includes('/send') && method === 'POST') {
-        resolve({ success: true, data: { id: parseInt(url.split('/')[3]) } });
-      } else {
-        resolve({ success: false, message: 'API error' });
-      }
-    }, 800);
-  });
-}

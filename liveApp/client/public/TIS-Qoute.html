@@ -1,210 +1,487 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Thaboera IT Solutions Invoice</title>
-  <link rel="stylesheet" href="css/style.css" />
-
-  
-  <!-- jsPDF and html2canvas for PDF generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-</head>
-<body onload="generateInvoiceNumber()">
-   <div class="invoice-app">
-
-  <!-- WRAP ALL INVOICE CONTENT -->
-  <div id="invoiceContent">
- <div class="framed-section">
-  </div>
-    <!-- COMPANY INFORMATION -->
-    <div class="framed-section company-info">
-  <!-- Logo -->
-  <div class="company-logo">
-    <img src="img/ThaboEra-Logo.png" alt="Company Logo" />
-  </div>
-
-  <!-- Text -->
-  <div class="company-info-text">
-    <h2>Thabo<span style="color: red;">era</span> IT Solutions</h2>
-    <p><strong class="slogan">Bridge Your IT Gap</strong></p>
-    <p>55 Richard's Drive, Halfway House, Midrand | www.thaboera.co.za </p>
-    <p>Email: info@thaboera.co.za | Tel: +27(0) 11 051 3906 | WhatsApp: +27 61 541 4097</p>
-    <p><strong id="vatNumber">VAT No.: 482027225 | Reg: 2006/184754/23</strong></p>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
     
-  </div>
-</div>
-
-
-    <p><strong id="invoiceNumber" style="font-weight: 900;">Qoute No: </strong></p>
-    <!-- CLIENT INFO -->
-    <div id="clientInfoDisplay" class="client-box"></div>
-
-    <!-- INVOICE DETAILS -->
-    <div id="invoiceDetailsDisplay" class="invoice-details-box"></div>
-
-    <!-- INVOICE TABLE -->
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Description</th>
-          <th>Qty</th>
-          <th>Discount</th>
-          <th>Taxable</th>
-          <th>Unit Price</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="invoiceBody"></tbody>
-    </table>
-
-    <!-- TOTALS AND PARTNERS SECTION -->
-<div class="totals-partners-container">
-  <!-- PARTNERS IMAGE - LEFT -->
-  <div class="partners">
-    <img src="img/partners.jpg" />
-  </div>
-
-  <!-- TOTALS - RIGHT -->
-  <div class="totals">
-    <p>Subtotal: R <span id="subtotal">0.00</span></p>
-    <p>VAT (15%): R <span id="vat">0.00</span></p>
-    <h3>Total: R <span id="total">0.00</span></h3>
-  </div>
-</div>
-
-
-   
-
-    <!-- BANKING DETAILS -->
-    <div class="banking-details">
-      <div class="banks-container">
-        <div class="bank left-bank">
-          <p><strong style="color: black;">First National Bank</strong></p>
-          <p>Thaboera IT Solutions</p>
-          <p>Acc No.: 6294256761</p>
-          <p>Acc Type: Cheque</p>
-          <p>Branch Code: 250117</p>
-          <p>Branch Name: Carlswald</p>
+    .invoice-app {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .framed-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    .company-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    .company-logo img {
+      max-height: 100px;
+      margin-right: 20px;
+    }
+    
+    .company-info-text h2 {
+      color: #2c3e50;
+      margin: 0;
+      font-size: 24px;
+    }
+    
+    .slogan {
+      color: #e74c3c;
+      font-style: italic;
+    }
+    
+    .client-box, .invoice-details-box {
+      padding: 15px;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #2c3e50;
+      color: white;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    
+    .totals-partners-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    .partners img {
+      max-width: 300px;
+      height: auto;
+    }
+    
+    .totals {
+      text-align: right;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      min-width: 300px;
+    }
+    
+    .totals h3 {
+      color: #e74c3c;
+    }
+    
+    .banking-details {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    .banks-container {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .bank {
+      width: 48%;
+    }
+    
+    button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      background-color: #c0392b;
+    }
+    
+    .boxed-details {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .boxed-details td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-app">
+    <!-- WRAP ALL INVOICE CONTENT -->
+    <div id="invoiceContent">
+      <!-- COMPANY INFORMATION -->
+      <div class="company-info">
+        <div class="company-logo">
+          <img src="img/ThaboEra-Logo.png" alt="Company Logo" />
         </div>
-        <div class="bank right-bank">
-          <p><strong style="color: black;">Standard Bank</strong></p>
-          <p>Thaboera IT Solutions</p>
-          <p>Acc No.: 242341063</p>
-          <p>Acc Type: Cheque</p>
-          <p>Branch Code: 001155</p>
-          <p>Branch Name: Midrand</p>
+        <div class="company-info-text">
+          <h2>Thabo<span style="color: red;">era</span> IT Solutions</h2>
+          <p><strong class="slogan">Bridge Your IT Gap</strong></p>
+          <p>55 Richard's Drive, Halfway House, Midrand | www.thaboera.co.za</p>
+          <p>Email: info@thaboera.co.za | Tel: +27(0) 11 051 3906 | WhatsApp: +27 61 541 4097</p>
+          <p><strong id="vatNumber">VAT No.: 482027225 | Reg: 2006/184754/23</strong></p>
+        </div>
+      </div>
+
+      <p><strong id="invoiceNumber" style="font-weight: 900;">Quotation No: </strong></p>
+      
+      <!-- CLIENT INFO -->
+      <div id="clientInfoDisplay" class="client-box"></div>
+
+      <!-- QUOTATION DETAILS -->
+      <div id="invoiceDetailsDisplay" class="invoice-details-box"></div>
+
+      <!-- QUOTATION TABLE -->
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Discount</th>
+            <th>Taxable</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceBody"></tbody>
+      </table>
+
+      <!-- TOTALS AND PARTNERS SECTION -->
+      <div class="totals-partners-container">
+        <div class="partners">
+          <img src="img/partners.jpg" alt="Our Partners" />
+        </div>
+        <div class="totals">
+          <p>Subtotal: R <span id="subtotal">0.00</span></p>
+          <p>VAT (15%): R <span id="vat">0.00</span></p>
+          <h3>Total: R <span id="total">0.00</span></h3>
+        </div>
+      </div>
+
+      <!-- BANKING DETAILS -->
+      <div class="banking-details">
+        <div class="banks-container">
+          <div class="bank left-bank">
+            <p><strong style="color: black;">First National Bank</strong></p>
+            <p>Thaboera IT Solutions</p>
+            <p>Acc No.: 6294256761</p>
+            <p>Acc Type: Cheque</p>
+            <p>Branch Code: 250117</p>
+            <p>Branch Name: Carlswald</p>
+          </div>
+          <div class="bank right-bank">
+            <p><strong style="color: black;">Standard Bank</strong></p>
+            <p>Thaboera IT Solutions</p>
+            <p>Acc No.: 242341063</p>
+            <p>Acc Type: Cheque</p>
+            <p>Branch Code: 001155</p>
+            <p>Branch Name: Midrand</p>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- PDF BUTTON -->
+    <div style="text-align: center; margin-top: 30px;">
+      <button onclick="downloadInvoice()">Download PDF</button>
+    </div>
   </div>
 
-
-  <!-- PDF BUTTON -->
-  <div style="text-align: center; margin-top: 30px;">
-    <button onclick="downloadInvoice()">Download PDF</button>
-  </div>
-
-  <!-- SCRIPT -->
-  <script>
-    let generatedInvoiceNumber = "";
-
-    // Generate a random invoice number like INV-202507090123
-    function generateInvoiceNumber() {
-      const now = new Date();
-      const datePart = now.getFullYear().toString() + 
-                       String(now.getMonth() + 1).padStart(2, '0') + 
-                       String(now.getDate()).padStart(2, '0');
-      const randomPart = Math.floor(Math.random() * 9000 + 1000);
-      generatedInvoiceNumber = `INV-${datePart}${randomPart}`;
-      document.getElementById("invoiceNumber").innerHTML = `Qoute No: ${generatedInvoiceNumber}`;
-    }
-
-  </script>
+  <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-  <!-- Optional: Your custom script -->
-  <script src="js/Qoute-script.js"></script>
+  <script>
+    // Global jsPDF reference
+    const { jsPDF } = window.jspdf;
+    let currentQuotationId = null;
 
-<script>
-  function renderInvoiceFromStorage() {
-    const clientInfo = JSON.parse(localStorage.getItem("clientInfo"));
-    const invoiceDetails = JSON.parse(localStorage.getItem("invoiceDetails"));
-    const invoiceItems = JSON.parse(localStorage.getItem("invoiceItems"));
-    const totals = JSON.parse(localStorage.getItem("totals"));
-    const invoiceNumber = localStorage.getItem("invoiceNumber");
-
-    if (clientInfo) {
-      document.getElementById("clientInfoDisplay").innerHTML = `
-    
-        <div style="display: flex; justify-content: space-between;">
-          <div>
-            <p><strong>Client:</strong> ${clientInfo.clientName}</p>
-            <p><strong>Contact Person:</strong> ${clientInfo.contactPerson}</p>
-            <p><strong>Contact:</strong> ${clientInfo.contactNumber}</p>
-           
-          </div>
-          <div>  
-            <p><strong>Email:</strong> ${clientInfo.email}</p> 
-            <p><strong>Address:</strong> ${clientInfo.address}</p>
-            <p><strong>Reg Number:</strong> ${clientInfo.regNumber}</p>
-          </div>
-        </div>
-      `;
+    // Get quotation ID from URL
+    function getQuotationIdFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('id');
     }
-if (invoiceDetails) {
-  document.getElementById("invoiceDetailsDisplay").innerHTML = `
-    <table class="boxed-details">
-      <tr>
-        <td><strong>Sales Rep:</strong></td><td>${invoiceDetails.salesRep}</td>
-        <td><strong>FOB:</strong></td><td>${invoiceDetails.fob}</td>
-        <td><strong>Tax ID:</strong></td><td>${invoiceDetails.taxId}</td>
-      </tr>
-      <tr>
-        <td><strong>Ship Via:</strong></td><td>${invoiceDetails.shipVia}</td>
-        <td><strong>Terms:</strong></td><td>${invoiceDetails.terms}</td>
-        <td><strong>Date:</strong></td><td>${invoiceDetails.invoiceDate}</td>
-      </tr>
-    </table>
-  `;
-}
 
+    // Fetch quotation data from API
+    async function fetchQuotationData(quotationId) {
+      try {
+        const response = await fetch(`/api/quotations/${quotationId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch quotation data');
+        }
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching quotation:', error);
+        return null;
+      }
+    }
 
-    if (invoiceItems) {
+    // Render quotation data
+    function renderQuotationData(quotation) {
+      if (!quotation) return;
+
+      // Set quotation number
+      document.getElementById("invoiceNumber").innerHTML = `Quotation No: ${quotation.quotationNumber}`;
+
+      // Render client info
+      if (quotation.Client) {
+        document.getElementById("clientInfoDisplay").innerHTML = `
+          <h3>Client Details</h3>
+          <div style="display: flex; justify-content: space-between;">
+            <div>
+              <p><strong>Client:</strong> ${quotation.Client.name}</p>
+              <p><strong>Contact Person:</strong> ${quotation.Client.contactPerson}</p>
+              <p><strong>Contact:</strong> ${quotation.Client.contactNumber}</p>
+            </div>
+            <div>
+              <p><strong>Email:</strong> ${quotation.Client.email}</p>
+              <p><strong>Address:</strong> ${quotation.Client.address}</p>
+              ${quotation.Client.regNumber ? `<p><strong>Reg Number:</strong> ${quotation.Client.regNumber}</p>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // Render quotation details
+      document.getElementById("invoiceDetailsDisplay").innerHTML = `
+        <h3>Quotation Details</h3>
+        <table class="boxed-details">
+          <tr>
+            <td><strong>Sales Rep:</strong></td><td>${quotation.salesRep}</td>
+            <td><strong>FOB:</strong></td><td>${quotation.fob || 'N/A'}</td>
+            <td><strong>Tax ID:</strong></td><td>${quotation.taxId || 'N/A'}</td>
+          </tr>
+          <tr>
+            <td><strong>Ship Via:</strong></td><td>${quotation.shipVia || 'N/A'}</td>
+            <td><strong>Terms:</strong></td><td>${quotation.terms || 'N/A'}</td>
+            <td><strong>Date:</strong></td><td>${new Date(quotation.dateIssued).toLocaleDateString()}</td>
+          </tr>
+        </table>
+      `;
+
+      // Render items
       const tbody = document.getElementById("invoiceBody");
       tbody.innerHTML = '';
-      invoiceItems.forEach(item => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${item.item}</td>
-          <td>${item.description}</td>
-          <td>${item.qty}</td>
-          <td>${item.discount}</td>
-          <td>${item.taxable}</td>
-          <td>${item.unitPrice}</td>
-          <td>${item.total}</td>
+      if (quotation.QuotationItems && quotation.QuotationItems.length > 0) {
+        quotation.QuotationItems.forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.item}</td>
+            <td>${item.description || ''}</td>
+            <td>${item.quantity}</td>
+            <td>${item.discount}%</td>
+            <td>${item.taxable ? 'Yes' : 'No'}</td>
+            <td>R ${parseFloat(item.unitPrice).toFixed(2)}</td>
+            <td>R ${parseFloat(item.total).toFixed(2)}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      // Render totals
+      document.getElementById("subtotal").textContent = parseFloat(quotation.subtotal).toFixed(2);
+      document.getElementById("vat").textContent = parseFloat(quotation.vat).toFixed(2);
+      document.getElementById("total").textContent = parseFloat(quotation.total).toFixed(2);
+    }
+
+    // Download as PDF
+    async function downloadInvoice() {
+      const invoiceElement = document.getElementById("invoiceContent");
+      
+      try {
+        const canvas = await html2canvas(invoiceElement, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff'
+        });
+
+        const imgData = canvas.toDataURL("image/jpeg", 1.0);
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgWidth = pageWidth;
+        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        const fileName = `Quotation_${currentQuotationId || new Date().getTime()}.pdf`;
+        pdf.save(fileName);
+
+        // Optional: Send PDF to server
+        await uploadPdfToServer(pdf, fileName);
+
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Error generating PDF. Please try again.');
+      }
+    }
+
+    // Upload PDF to server (optional)
+    async function uploadPdfToServer(pdf, fileName) {
+      try {
+        const blob = pdf.output('blob');
+        const formData = new FormData();
+        formData.append('pdf', blob, fileName);
+        formData.append('quotationId', currentQuotationId);
+
+        const response = await fetch('/api/quotations/upload-pdf', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload PDF');
+        }
+      } catch (error) {
+        console.error('Error uploading PDF:', error);
+      }
+    }
+
+    // Initialize page
+    async function initializePage() {
+      currentQuotationId = getQuotationIdFromUrl();
+      
+      if (currentQuotationId) {
+        const quotationData = await fetchQuotationData(currentQuotationId);
+        renderQuotationData(quotationData);
+      } else {
+        // Fallback to localStorage if no ID in URL
+        renderInvoiceFromStorage();
+      }
+    }
+
+    // Fallback to localStorage if needed
+    function renderInvoiceFromStorage() {
+      const clientInfo = JSON.parse(localStorage.getItem("clientInfo"));
+      const invoiceDetails = JSON.parse(localStorage.getItem("invoiceDetails"));
+      const invoiceItems = JSON.parse(localStorage.getItem("invoiceItems"));
+      const totals = JSON.parse(localStorage.getItem("totals"));
+      const invoiceNumber = localStorage.getItem("invoiceNumber");
+
+      if (clientInfo) {
+        document.getElementById("clientInfoDisplay").innerHTML = `
+          <h3>Client Details</h3>
+          <div style="display: flex; justify-content: space-between;">
+            <div>
+              <p><strong>Client:</strong> ${clientInfo.clientName}</p>
+              <p><strong>Contact Person:</strong> ${clientInfo.contactPerson}</p>
+              <p><strong>Contact:</strong> ${clientInfo.contactNumber}</p>
+            </div>
+            <div>
+              <p><strong>Email:</strong> ${clientInfo.email}</p>
+              <p><strong>Address:</strong> ${clientInfo.address}</p>
+              ${clientInfo.regNumber ? `<p><strong>Reg Number:</strong> ${clientInfo.regNumber}</p>` : ''}
+            </div>
+          </div>
         `;
-        tbody.appendChild(row);
-      });
+      }
+
+      if (invoiceDetails) {
+        document.getElementById("invoiceDetailsDisplay").innerHTML = `
+          <h3>Quotation Details</h3>
+          <table class="boxed-details">
+            <tr>
+              <td><strong>Sales Rep:</strong></td><td>${invoiceDetails.salesRep}</td>
+              <td><strong>FOB:</strong></td><td>${invoiceDetails.fob || 'N/A'}</td>
+              <td><strong>Tax ID:</strong></td><td>${invoiceDetails.taxId || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td><strong>Ship Via:</strong></td><td>${invoiceDetails.shipVia || 'N/A'}</td>
+              <td><strong>Terms:</strong></td><td>${invoiceDetails.terms || 'N/A'}</td>
+              <td><strong>Date:</strong></td><td>${invoiceDetails.invoiceDate}</td>
+            </tr>
+          </table>
+        `;
+      }
+
+      if (invoiceItems) {
+        const tbody = document.getElementById("invoiceBody");
+        tbody.innerHTML = '';
+        invoiceItems.forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.item}</td>
+            <td>${item.description || ''}</td>
+            <td>${item.qty}</td>
+            <td>${item.discount}%</td>
+            <td>${item.taxable}</td>
+            <td>R ${parseFloat(item.unitPrice).toFixed(2)}</td>
+            <td>R ${parseFloat(item.total).toFixed(2)}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      if (totals) {
+        document.getElementById("subtotal").textContent = parseFloat(totals.subtotal).toFixed(2);
+        document.getElementById("vat").textContent = parseFloat(totals.vat).toFixed(2);
+        document.getElementById("total").textContent = parseFloat(totals.total).toFixed(2);
+      }
+
+      if (invoiceNumber) {
+        document.getElementById("invoiceNumber").innerHTML = invoiceNumber;
+      }
     }
 
-    if (totals) {
-      document.getElementById("subtotal").textContent = totals.subtotal;
-      document.getElementById("vat").textContent = totals.vat;
-      document.getElementById("total").textContent = totals.total;
-    }
-
-    if (invoiceNumber) {
-      document.getElementById("invoiceNumber").innerHTML = invoiceNumber;
-    }
-  }
-
-  window.onload = renderInvoiceFromStorage;
-</script>
-
-
+    // Initialize the page when loaded
+    window.onload = initializePage;
+  </script>
 </body>
 </html>

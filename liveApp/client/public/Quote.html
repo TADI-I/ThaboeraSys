@@ -1,90 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Thaboera IT Solutions Invoice</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thaboera IT Solutions - Quotation System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .invoice-app {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    h2 {
+      color: #2c3e50;
+      border-bottom: 2px solid #e74c3c;
+      padding-bottom: 5px;
+      margin-top: 0;
+    }
+    
+    input, select {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      background-color: #c0392b;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #2c3e50;
+      color: white;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    
+    .totals {
+      text-align: right;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    
+    .totals h3 {
+      color: #e74c3c;
+    }
+    
+    .client-box, .invoice-details-box {
+      padding: 15px;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    .company-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    .company-logo img {
+      max-height: 100px;
+      margin-right: 20px;
+    }
+    
+    .company-info-text h2 {
+      color: #2c3e50;
+      margin: 0;
+      font-size: 24px;
+    }
+    
+    .slogan {
+      color: #e74c3c;
+      font-style: italic;
+    }
+    
+    .confirmation {
+      margin-top: 10px;
+      color: green;
+      font-weight: bold;
+    }
+    
+    .boxed-details {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .boxed-details td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+    
+    .boxed-details tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
   <div class="invoice-app">
+    <!-- COMPANY INFORMATION -->
+    <div class="company-info">
+      <div class="company-logo">
+        <img src="img/ThaboEra-Logo.png" alt="Thaboera IT Solutions Logo" />
+      </div>
+      <div class="company-info-text">
+        <h2>Thabo<span style="color: #e74c3c;">era</span> IT Solutions</h2>
+        <p><strong class="slogan">Bridge Your IT Gap</strong></p>
+        <p>55 Richard's Drive, Halfway House, Midrand | www.thaboera.co.za</p>
+        <p>Email: info@thaboera.co.za | Tel: +27(0) 11 051 3906 | WhatsApp: +27 61 541 4097</p>
+        <p><strong id="vatNumber">VAT No.: 482027225 | Reg: 2006/184754/23</strong></p>
+        <p><strong id="invoiceNumber">Quotation No: </strong></p>
+      </div>
+    </div>
 
     <!-- CLIENT INFORMATION -->
     <section>
       <h2>Client Information</h2>
-      <input type="text" id="clientName" placeholder="Client Name" />
-      <input type="text" id="contactPerson" placeholder="Contact Person" />
-      <input type="text" id="contactNumber" placeholder="Contact Number" />
-      <input type="email" id="email" placeholder="Email Address" />
-      <input type="text" id="address" placeholder="Address" />
+      <input type="text" id="clientName" placeholder="Client Name" required />
+      <input type="text" id="contactPerson" placeholder="Contact Person" required />
+      <input type="text" id="contactNumber" placeholder="Contact Number" required />
+      <input type="email" id="email" placeholder="Email Address" required />
+      <input type="text" id="address" placeholder="Address" required />
       <input type="text" id="regNumber" placeholder="Registration Number" />
       <button onclick="showClientInfo()">Save Client Info</button>
-      <div id="confirmation" style="margin-top: 10px; color: green; font-weight: bold;"></div>
-
+      <div id="confirmation" class="confirmation"></div>
     </section>
 
-    <!-- INVOICE DETAILS SECTION -->
-<section>
-  <h2>Qoutation Details</h2>
-  <input type="text" id="salesRep" placeholder="Sales Rep" />
-  <input type="text" id="fob" placeholder="FOB" />
-  <input type="text" id="shipVia" placeholder="Ship Via" />
-  <input type="text" id="terms" placeholder="Terms" />
-  <input type="text" id="taxId" placeholder="Tax ID" />
-  <input type="date" id="invoiceDate" />
-  <button onclick="showInvoiceDetails()">Save Qoute Details</button>
-  <div id="conf" style="margin-top: 10px; color: green; font-weight: bold;"></div>
+    <!-- QUOTATION DETAILS SECTION -->
+    <section>
+      <h2>Quotation Details</h2>
+      <input type="text" id="salesRep" placeholder="Sales Rep" required />
+      <input type="text" id="fob" placeholder="FOB" />
+      <input type="text" id="shipVia" placeholder="Ship Via" />
+      <input type="text" id="terms" placeholder="Terms" />
+      <input type="text" id="taxId" placeholder="Tax ID" />
+      <input type="date" id="invoiceDate" required />
+      <button onclick="showInvoiceDetails()">Save Quotation Details</button>
+      <div id="conf" class="confirmation"></div>
+    </section>
 
-</section>
-
-          <!-- ITEM INFORMATION -->
-      <div class="framed-section">
-        <section>
-          <!-- <h2>Invoice Item</h2>-->
-          <input type="text" id="item" placeholder="Item Name" />
-          <input type="text" id="description" placeholder="Description" />
-          <input type="number" id="qty" placeholder="Quantity" />
-          <input type="number" id="unitPrice" placeholder="Unit Price" />
-          <input type="number" id="discount" placeholder="Discount (%)" />
-          <select id="taxable">
-            <option value="yes">Taxable</option>
-            <option value="no">Non-taxable</option>
-          </select>
-          <button onclick="addItem()">Add Item</button>
-        </section>
-      </div>
-  <!-- WRAP ALL INVOICE CONTENT -->
-
-    <!-- COMPANY INFORMATION -->
-    <div class="framed-section company-info">
-  <!-- Logo -->
-  <div class="company-logo">
-    <img src="img/ThaboEra-Logo.png" alt="Company Logo" />
-  </div> 
-
-  <!-- Text -->
-  <div class="company-info-text">
-    <h2>Thabo<span style="color: red;">era</span> IT Solutions</h2>
-    <p><strong class="slogan">Bridge Your IT Gap</strong></p>
-    <p>55 Richard's Drive, Halfway House, Midrand | www.thaboera.co.za </p>
-    <p>Email: info@thaboera.co.za | Tel: +27(0) 11 051 3906 | WhatsApp: +27 61 541 4097</p>
-    <p><strong id="vatNumber">VAT No.: 482027225 | Reg: 2006/184754/23</strong></p>
-    <p><strong id="invoiceNumber">Invoice No: </strong></p>
-  </div>
-</div>
-
+    <!-- ITEM INFORMATION -->
+    <section>
+      <h2>Add Items</h2>
+      <input type="text" id="item" placeholder="Item Name" required />
+      <input type="text" id="description" placeholder="Description" />
+      <input type="number" id="qty" placeholder="Quantity" min="1" step="1" required />
+      <input type="number" id="unitPrice" placeholder="Unit Price" min="0" step="0.01" required />
+      <input type="number" id="discount" placeholder="Discount (%)" min="0" max="100" step="1" value="0" />
+      <select id="taxable" required>
+        <option value="yes">Taxable</option>
+        <option value="no">Non-taxable</option>
+      </select>
+      <button onclick="addItem()">Add Item</button>
+    </section>
 
     <!-- DISPLAY CLIENT INFO -->
     <div id="clientInfoDisplay" class="client-box"></div>
 
+    <!-- DISPLAY QUOTATION DETAILS -->
     <div id="invoiceDetailsDisplay" class="invoice-details-box"></div>
 
-  
-
-    <!-- DISPLAY INVOICE ITEMS -->
-     <!-- INVOICE TABLE -->
-    <table>
+    <!-- ITEMS TABLE -->
+    <table id="itemsTable">
       <thead>
         <tr>
           <th>Item</th>
@@ -100,8 +225,6 @@
       <tbody id="invoiceBody"></tbody>
     </table>
 
-   
-
     <!-- TOTALS -->
     <div class="totals">
       <p>Subtotal: R <span id="subtotal">0.00</span></p>
@@ -109,39 +232,412 @@
       <h3>Total: R <span id="total">0.00</span></h3>
     </div>
 
-    <!--partners-->
-   <!--<div class="partners">
-      <img src="img/partners.jpg">
-      </div>-->
-<!-- BANKING DETAILS -->
-<!--<div class="banking-details">
-  <h2>Banking Details</h2>
-  <div class="banks-container">
-    <div class="bank left-bank">
-      <p><strong style="color: black;">First National Bank</strong></p>
-      <p>Thaboera IT Solutions</p>
-      <p>Acc No.: 6294256761</p>
-      <p>Acc Type: Cheque</p>
-      <p>Branch Code: 250117</p>
-      <p>Branch Name: Carlswald</p>
-    </div>
-    <div class="bank right-bank">
-      <p><strong style="color: black;">Standard Bank</strong></p>
-      <p>Thaboera IT Solutions</p>
-      <p>Acc No.: 242341063</p>
-      <p>Acc Type: Cheque</p>
-      <p>Branch Code: 001155</p>
-      <p>Branch Name: Midrand</p>
+    <!-- ACTION BUTTONS -->
+    <div style="text-align: center; margin-top: 30px;">
+      <button onclick="downloadAndRedirect()">Preview Quotation</button>
+      <button onclick="downloadInvoice()">Download PDF</button>
+      <button onclick="clearForm()" style="background-color: #95a5a6;">Clear Form</button>
     </div>
   </div>
-</div>-->
 
-<div style="text-align: center; margin-top: 30px;">
-  <a></a><button onclick=" downloadAndRedirect()">Preview Qoute</button></div></a>
-</div>
+  <script>
+    let subtotal = 0;
+    let vat = 0;
+    let total = 0;
+    let clientId = null;
 
-  </div>
+    // Generate quotation number on page load
+    window.addEventListener("DOMContentLoaded", function() {
+      generateInvoiceNumber();
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById("invoiceDate").value = today;
+    });
 
-  <script src="js/Qoute-script.js"></script>
+    async function showClientInfo() {
+      clientId = await saveClientToDatabase();
+      
+      if (clientId !== null) {
+        const clientName = document.getElementById("clientName").value;
+        const contactPerson = document.getElementById("contactPerson").value;
+        const contactNumber = document.getElementById("contactNumber").value;
+        const email = document.getElementById("email").value;
+        const address = document.getElementById("address").value;
+        const regNumber = document.getElementById("regNumber").value;
+
+        const clientInfoDiv = document.getElementById("clientInfoDisplay");
+        clientInfoDiv.innerHTML = `
+          <h3>Client Details</h3>
+          <div style="display: flex; justify-content: space-between;">
+            <div>
+              <p><strong>Client:</strong> ${clientName}</p>
+              <p><strong>Contact Person:</strong> ${contactPerson}</p>
+              <p><strong>Contact:</strong> ${contactNumber}</p>
+            </div>
+            <div>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Address:</strong> ${address}</p>
+              <p><strong>Reg Number:</strong> ${regNumber}</p>
+            </div>
+          </div>
+        `;
+        document.getElementById("confirmation").textContent = "✅ Client info saved successfully!";
+      } else {
+        document.getElementById("confirmation").textContent = "❌ Failed to save client info!";
+      }
+    }
+
+    async function saveClientToDatabase() {
+      const clientData = {
+        name: document.getElementById("clientName").value,
+        contactPerson: document.getElementById("contactPerson").value,
+        contactNumber: document.getElementById("contactNumber").value,
+        email: document.getElementById("email").value,
+        address: document.getElementById("address").value,
+        regNumber: document.getElementById("regNumber").value
+      };
+
+      try {
+        const response = await fetch('/api/quotations/client', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(clientData)
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          return result.clientId;
+        } else {
+          console.error('Failed to save client:', result.message);
+          return null;
+        }
+      } catch (error) {
+        console.error('Error saving client:', error);
+        return null;
+      }
+    }
+
+    function showInvoiceDetails() {
+      const salesRep = document.getElementById("salesRep").value;
+      const fob = document.getElementById("fob").value;
+      const shipVia = document.getElementById("shipVia").value;
+      const terms = document.getElementById("terms").value;
+      const taxId = document.getElementById("taxId").value;
+      const invoiceDate = document.getElementById("invoiceDate").value;
+
+      const detailsDisplay = document.getElementById("invoiceDetailsDisplay");
+      detailsDisplay.innerHTML = `
+        <h3>Quotation Details</h3>
+        <table class="boxed-details">
+          <tr>
+            <td><strong>Sales Rep:</strong></td><td>${salesRep}</td>
+            <td><strong>FOB:</strong></td><td>${fob}</td>
+            <td><strong>Tax ID:</strong></td><td>${taxId}</td>
+          </tr>
+          <tr>
+            <td><strong>Ship Via:</strong></td><td>${shipVia}</td>
+            <td><strong>Terms:</strong></td><td>${terms}</td>
+            <td><strong>Date:</strong></td><td>${invoiceDate}</td>
+          </tr>
+        </table>
+      `;
+      document.getElementById("conf").textContent = "✅ Quotation details saved successfully!";
+    }
+
+    function addItem() {
+      const item = document.getElementById("item").value;
+      const description = document.getElementById("description").value;
+      const qty = parseFloat(document.getElementById("qty").value);
+      const unitPrice = parseFloat(document.getElementById("unitPrice").value);
+      const discount = parseFloat(document.getElementById("discount").value) || 0;
+      const taxable = document.getElementById("taxable").value;
+
+      if (!item || isNaN(qty) || isNaN(unitPrice)) {
+        alert("Please enter all required item fields.");
+        return;
+      }
+
+      const discountedPrice = unitPrice - (unitPrice * discount / 100);
+      const itemTotal = qty * discountedPrice;
+      const vatAmount = taxable === "yes" ? itemTotal * 0.15 : 0;
+
+      subtotal += itemTotal;
+      vat += vatAmount;
+      total = subtotal + vat;
+
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${item}</td>
+        <td>${description}</td>
+        <td>${qty}</td>
+        <td>${discount}%</td>
+        <td>${taxable}</td>
+        <td>${unitPrice.toFixed(2)}</td>
+        <td>${itemTotal.toFixed(2)}</td>
+        <td>
+          <button onclick="editRow(this)">Edit</button>
+          <button onclick="deleteRow(this)">Delete</button>
+        </td>
+      `;
+
+      document.getElementById("invoiceBody").appendChild(row);
+      updateTotals();
+
+      // Reset input fields
+      document.getElementById("item").value = '';
+      document.getElementById("description").value = '';
+      document.getElementById("qty").value = '';
+      document.getElementById("unitPrice").value = '';
+      document.getElementById("discount").value = '0';
+      document.getElementById("taxable").value = 'yes';
+      document.getElementById("item").focus();
+    }
+
+    function updateTotals() {
+      document.getElementById("subtotal").innerText = subtotal.toFixed(2);
+      document.getElementById("vat").innerText = vat.toFixed(2);
+      document.getElementById("total").innerText = total.toFixed(2);
+    }
+
+    function deleteRow(button) {
+      const row = button.closest("tr");
+      const cells = row.querySelectorAll("td");
+
+      const qty = parseFloat(cells[2].innerText);
+      const discountText = cells[3].innerText.replace('%', '');
+      const discount = parseFloat(discountText) || 0;
+      const taxable = cells[4].innerText;
+      const unitPrice = parseFloat(cells[5].innerText);
+      const itemTotal = parseFloat(cells[6].innerText);
+
+      const isTaxable = taxable === "yes";
+      const vatAmount = isTaxable ? itemTotal * 0.15 : 0;
+
+      subtotal -= itemTotal;
+      vat -= vatAmount;
+      total = subtotal + vat;
+
+      row.remove();
+      updateTotals();
+    }
+
+    function editRow(button) {
+      const row = button.closest("tr");
+      const cells = row.querySelectorAll("td");
+
+      // Pre-fill form fields
+      document.getElementById("item").value = cells[0].innerText;
+      document.getElementById("description").value = cells[1].innerText;
+      document.getElementById("qty").value = cells[2].innerText;
+      document.getElementById("discount").value = cells[3].innerText.replace('%', '');
+      document.getElementById("taxable").value = cells[4].innerText.toLowerCase();
+      document.getElementById("unitPrice").value = cells[5].innerText;
+
+      // Revert values
+      const itemTotal = parseFloat(cells[6].innerText);
+      const isTaxable = cells[4].innerText === "yes";
+      const vatAmount = isTaxable ? itemTotal * 0.15 : 0;
+
+      subtotal -= itemTotal;
+      vat -= vatAmount;
+      total = subtotal + vat;
+
+      row.remove();
+      updateTotals();
+    }
+
+    function generateInvoiceNumber() {
+      const date = new Date();
+      const year = date.getFullYear().toString().slice(-2);
+      const month = ("0" + (date.getMonth() + 1)).slice(-2);
+      const day = ("0" + date.getDate()).slice(-2);
+
+      const key = `invoiceCount-${year}${month}${day}`;
+      let count = localStorage.getItem(key);
+      count = count ? parseInt(count) + 1 : 1;
+      localStorage.setItem(key, count);
+
+      const invoiceNum = `TIS-Q-${year}${month}${day}-${count}`;
+      document.getElementById("invoiceNumber").innerText = `Quotation No: ${invoiceNum}`;
+      return invoiceNum;
+    }
+
+    async function downloadAndRedirect() {
+      // First validate required fields
+      if (!validateForm()) {
+        return;
+      }
+
+      // Save client info if not already saved
+      if (!clientId) {
+        clientId = await saveClientToDatabase();
+        if (!clientId) {
+          alert('Failed to save client information');
+          return;
+        }
+      }
+
+      const quotationNumber = document.getElementById("invoiceNumber").textContent.replace('Quotation No: ', '');
+      const invoiceDate = document.getElementById("invoiceDate").value;
+
+      const rows = Array.from(document.querySelectorAll("#invoiceBody tr"));
+      const invoiceItems = rows.map(row => {
+        const cells = row.querySelectorAll("td");
+        return {
+          item: cells[0].textContent,
+          description: cells[1].textContent,
+          qty: cells[2].textContent,
+          discount: cells[3].textContent.replace('%', ''),
+          taxable: cells[4].textContent,
+          unitPrice: cells[5].textContent,
+          total: cells[6].textContent
+        };
+      });
+
+      const quotationData = {
+        clientId,
+        quotationNumber,
+        dateIssued: invoiceDate,
+        salesRep: document.getElementById("salesRep").value,
+        fob: document.getElementById("fob").value,
+        shipVia: document.getElementById("shipVia").value,
+        terms: document.getElementById("terms").value,
+        taxId: document.getElementById("taxId").value,
+        subtotal: document.getElementById("subtotal").textContent,
+        vat: document.getElementById("vat").textContent,
+        total: document.getElementById("total").textContent,
+        items: JSON.stringify(invoiceItems)
+      };
+
+      try {
+        const response = await fetch('/api/quotations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(quotationData)
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          // Store data in localStorage for the preview page
+          localStorage.setItem("currentQuotation", JSON.stringify({
+            clientInfo: {
+              clientName: document.getElementById("clientName").value,
+              contactPerson: document.getElementById("contactPerson").value,
+              contactNumber: document.getElementById("contactNumber").value,
+              email: document.getElementById("email").value,
+              address: document.getElementById("address").value,
+              regNumber: document.getElementById("regNumber").value
+            },
+            quotationDetails: {
+              salesRep: document.getElementById("salesRep").value,
+              fob: document.getElementById("fob").value,
+              shipVia: document.getElementById("shipVia").value,
+              terms: document.getElementById("terms").value,
+              taxId: document.getElementById("taxId").value,
+              invoiceDate: document.getElementById("invoiceDate").value,
+              quotationNumber: quotationNumber
+            },
+            items: invoiceItems,
+            totals: {
+              subtotal: document.getElementById("subtotal").textContent,
+              vat: document.getElementById("vat").textContent,
+              total: document.getElementById("total").textContent
+            }
+          }));
+
+          // Redirect to preview page
+          window.location.href = `TIS-Qoute.html?id=${result.quotationId || quotationId}`;
+        } else {
+          alert('Failed to save quotation: ' + (result.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error saving quotation:', error);
+        alert('Error saving quotation');
+      }
+    }
+
+    async function downloadInvoice() {
+      // First save the quotation data
+      await downloadAndRedirect();
+      
+      // The actual PDF generation will happen on the preview page
+    }
+
+    function validateForm() {
+      const requiredFields = [
+        'clientName', 'contactPerson', 'contactNumber', 'email', 'address',
+        'salesRep', 'invoiceDate'
+      ];
+
+      for (const fieldId of requiredFields) {
+        const field = document.getElementById(fieldId);
+        if (!field.value.trim()) {
+          alert(`Please fill in the ${field.placeholder || fieldId} field`);
+          field.focus();
+          return false;
+        }
+      }
+
+      if (document.querySelectorAll("#invoiceBody tr").length === 0) {
+        alert("Please add at least one item to the quotation");
+        return false;
+      }
+
+      return true;
+    }
+
+    function clearForm() {
+      if (confirm("Are you sure you want to clear the entire form?")) {
+        // Reset form fields
+        document.getElementById("clientName").value = '';
+        document.getElementById("contactPerson").value = '';
+        document.getElementById("contactNumber").value = '';
+        document.getElementById("email").value = '';
+        document.getElementById("address").value = '';
+        document.getElementById("regNumber").value = '';
+        
+        document.getElementById("salesRep").value = '';
+        document.getElementById("fob").value = '';
+        document.getElementById("shipVia").value = '';
+        document.getElementById("terms").value = '';
+        document.getElementById("taxId").value = '';
+        
+        document.getElementById("item").value = '';
+        document.getElementById("description").value = '';
+        document.getElementById("qty").value = '';
+        document.getElementById("unitPrice").value = '';
+        document.getElementById("discount").value = '0';
+        document.getElementById("taxable").value = 'yes';
+
+        // Clear displayed info
+        document.getElementById("clientInfoDisplay").innerHTML = '';
+        document.getElementById("invoiceDetailsDisplay").innerHTML = '';
+        document.getElementById("invoiceBody").innerHTML = '';
+        
+        // Reset totals
+        subtotal = 0;
+        vat = 0;
+        total = 0;
+        updateTotals();
+        
+        // Reset confirmation messages
+        document.getElementById("confirmation").textContent = '';
+        document.getElementById("conf").textContent = '';
+        
+        // Generate new quotation number
+        generateInvoiceNumber();
+        
+        // Reset clientId
+        clientId = null;
+      }
+    }
+  </script>
 </body>
 </html>

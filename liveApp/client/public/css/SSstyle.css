@@ -1,0 +1,302 @@
+body {
+  font-family: Arial, sans-serif;
+ 
+  background-size: cover;                 
+  background-repeat: no-repeat;         
+  background-position: center;            
+  background-attachment: fixed; 
+  background-image: url('img/ThaboEra-Logo.png');          
+  margin: 0;
+    color: rgb(0, 128, 0);
+  padding: 20px;
+}
+
+
+.invoice-app {
+  max-width: 1000px;
+  margin: auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#invoiceContent {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 20mm;
+  margin: auto;
+  background: white;
+  font-size: 11px;
+  box-sizing: border-box;
+}
+@media print {
+  button, .no-print {
+    display: none !important;
+  }
+}
+
+
+
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 10px;
+  border: 1px solid #cce0f0;
+  border-radius: 4px;
+}
+
+button {
+  background-color: #ff0000;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: rgb(0, 128, 0);
+}
+
+/* Global table styling - removes vertical lines */
+table {
+  color: rgb(0, 128, 0);
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 11px;
+}
+
+th, td {
+  border-top: 1px solid rgb(0, 128, 0);
+  border-bottom: 1px solid rgb(0, 128, 0);
+  border-left: none;
+  border-right: none;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+}
+
+/* Override for invoice details table: show full borders */
+.boxed-details td,
+.boxed-details th {
+  border: 1px solid rgb(0, 128, 0) !important;
+  text-align: left;
+  padding: 6px 8px;
+}
+
+
+.boxed-details td,
+.boxed-details th {
+  border: 1px solid rgb(0, 128, 0) !important;
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 11px;
+}
+
+
+.client-box {
+ font-size: 12px;
+}
+
+.totals-partners-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.partners {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.partners img {
+  max-width: 150%;  /* previously 150% which caused overflow */
+  height: auto;
+}
+
+
+.totals {
+  flex: 1;
+  text-align: right;
+  font-size: 12px;
+}
+
+.company-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px;
+  background-color: #cce0f0;
+  border-bottom: 2px solid #004aad;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.company-logo img {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+}
+
+.company-info-text h2 {
+  margin: 0;
+  color: #004aad;
+}
+
+.company-info-text p {
+  margin: 3px 0;
+  font-size: 12px;
+  color: rgb(0, 128, 0);
+}
+
+.company-info-text .slogan {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.invoice-details-box {
+ font-size: 12px;
+}
+.banking-details {
+  background-color: #f3f6fb;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 6px;
+  border: 1px solid #cce0f0;
+}
+
+
+
+.banking-details p {
+  margin: 3px 0;
+ font-size: 12px;
+  color: rgb(0, 128, 0);
+}
+
+.banks-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.bank {
+  width: 40%;
+}
+
+.framed-section {
+  border: 1px solid #444;
+  padding: 12px;
+  margin: 16px 0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.framed-section h2 {
+  margin-top: 0;
+  color: rgb(0, 128, 0);
+}
+
+.slogan
+{
+  color: #ff0000;
+
+}
+
+
+.framed-section input,
+.framed-section select {
+  display: block;
+  margin-bottom: 8px;
+  width: 100%;
+  max-width: 300px;
+  padding: 6px;
+}
+
+.framed-section button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #009200;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.framed-section button:hover {
+  background-color: #ff0000;
+}
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .invoice-app, 
+  #invoiceContent {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  input, select, button {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .totals-partners-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .partners,
+  .totals,
+  .bank {
+    width: 100% !important;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .banks-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  table,
+  th,
+  td {
+    font-size: 10px;
+    word-wrap: break-word;
+  }
+
+  .framed-section input,
+  .framed-section select {
+    max-width: 100%;
+  }
+
+  .company-info {
+    font-size: 14px;
+  }
+
+  .client-box,
+  .invoice-details-box {
+    font-size: 12px;
+  }
+}
+@media screen and (max-width: 600px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+
+
+

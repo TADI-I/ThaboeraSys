@@ -66,21 +66,23 @@ h1 {
 }
 
 /* Table Styles */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+table thead th{
+    background-color: #d32f2f; /* Green background */
+    color: white;              /* White text */
+    font-weight: bold;         /* Bold text */
+    padding: 10px;             /* Padding */
+    text-align: left;          /* Align text to the left */
+    border-bottom: 2px solid #333; /* Bottom border */
 }
 
-th, td {
+ td {
   text-align: left;
   padding: 12px;
   border-bottom: 1px solid #ddd;
+  color: black;
 }
 
-th {
-  background-color: #f4f4f4;
-}
+
 
 .actions button {
   margin-right: 8px;
